@@ -1,50 +1,12 @@
 export const renderAppShell = () => {
   document.querySelector("#app").innerHTML = `
-    <main class="relative mx-auto flex min-h-screen max-w-[1500px] gap-4 p-2 sm:p-4 lg:gap-5 lg:p-8">
-      <aside class="glass sticky top-6 hidden h-[calc(100vh-3rem)] w-[84px] shrink-0 flex-col items-center justify-between rounded-3xl px-3 py-7 lg:flex">
-        <div class="flex flex-col items-center gap-8">
-          <div class="grid h-12 w-12 place-items-center rounded-2xl bg-blue-600 text-white shadow-glow">
-            <i data-lucide="shield-keyhole" class="h-6 w-6"></i>
-          </div>
-          <nav class="flex flex-col gap-4 text-slate-500">
-            ${["layout-dashboard", "lock", "unlock-keyhole", "braces", "history"].map((icon, index) => `
-              <a href="${index === 0 ? "#" : index < 3 ? "#tool" : index === 3 ? "#algorithms" : "#activity"}" class="grid h-12 w-12 place-items-center rounded-2xl ${index === 0 ? "bg-white/70 text-blue-600 shadow-sm" : ""} transition hover:-translate-y-0.5 hover:bg-white/70 hover:text-blue-600">
-                <i data-lucide="${icon}" class="h-5 w-5"></i>
-              </a>
-            `).join("")}
-          </nav>
-        </div>
-        <button class="grid h-12 w-12 place-items-center rounded-2xl text-slate-500 transition hover:bg-white/70 hover:text-blue-600" title="Settings">
-          <i data-lucide="settings" class="h-5 w-5"></i>
-        </button>
-      </aside>
-
-      <section class="glass min-w-0 flex-1 rounded-3xl p-3 shadow-glass sm:p-5 lg:rounded-[2rem] lg:p-8">
-        <header class="mb-5 flex items-center justify-between gap-4 sm:mb-8">
-          <div class="flex items-center gap-3">
-            <span class="grid h-10 w-10 place-items-center rounded-2xl bg-blue-600/10 text-blue-600">
-              <i data-lucide="shield-check" class="h-5 w-5"></i>
-            </span>
-            <h1 class="text-lg font-bold tracking-tight sm:text-xl">Crypto <span class="text-blue-600">Toolkit</span></h1>
-          </div>
-          <nav class="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
-            <a href="#algorithms" class="transition hover:text-blue-600">Algorithms</a>
-            <a href="#tool" class="transition hover:text-blue-600">Toolkit</a>
-            <a href="#activity" class="transition hover:text-blue-600">History</a>
-          </nav>
-        </header>
-
-        <nav class="glass-soft mb-5 grid grid-cols-5 gap-2 rounded-2xl p-2 text-slate-500 lg:hidden">
-          ${["layout-dashboard", "lock", "unlock-keyhole", "braces", "history"].map((icon, index) => `
-            <a href="${index === 0 ? "#" : index < 3 ? "#tool" : index === 3 ? "#algorithms" : "#activity"}" class="grid h-11 place-items-center rounded-xl ${index === 0 ? "bg-white/70 text-blue-600" : ""} transition hover:bg-white/70 hover:text-blue-600">
-              <i data-lucide="${icon}" class="h-5 w-5"></i>
-            </a>
-          `).join("")}
-        </nav>
-
-        ${heroSection()}
+    <main class="relative mx-auto flex min-h-screen max-w-[1220px] items-center p-2 sm:p-4 lg:p-8">
+      <!-- Sidebar temporarily commented out for focused encryption/decryption view. -->
+      <!-- Header and mobile navigation temporarily commented out. -->
+      <section class="min-w-0 flex-1 rounded-3xl p-0 sm:p-2 lg:p-4">
+        <!-- Hero section temporarily commented out. -->
         ${toolSection()}
-        ${activitySection()}
+        <!-- Activity/history section temporarily commented out. -->
       </section>
     </main>
   `;
@@ -262,6 +224,8 @@ export const setBusy = (els, busy) => {
 };
 
 export const renderHistory = (els, history) => {
+  if (!els.historyList) return;
+
   if (!history.length) {
     els.historyList.innerHTML = '<div class="glass-soft rounded-2xl p-4 text-sm text-slate-600">No operations yet. Encrypt or decrypt something to start the trail.</div>';
     return;

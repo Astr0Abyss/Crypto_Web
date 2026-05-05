@@ -153,8 +153,10 @@ els.clearBtn.addEventListener("click", () => {
   setMessage(els, "Cleared.");
 });
 
-els.clearHistoryBtn.addEventListener("click", () => {
-  state.history = [];
-  renderHistory(els, state.history);
-  setMessage(els, "History cleared.");
-});
+if (els.clearHistoryBtn) {
+  els.clearHistoryBtn.addEventListener("click", () => {
+    state.history = [];
+    renderHistory(els, state.history);
+    setMessage(els, "History cleared.");
+  });
+}
