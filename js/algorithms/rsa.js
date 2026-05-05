@@ -70,7 +70,7 @@ export const rsaCipher = {
   keyLabel: "Public Key (n,e)",
   defaultKey: DEFAULT_PUBLIC_KEY,
   keyPlaceholder: "Example: 391,3",
-  description: "Educational RSA: A=1 ... Z=26, then each number is encrypted with c = m^e mod n.",
+  description: "RSA: A=1 ... Z=26, then each number is encrypted with c = m^e mod n.",
 
   generateKeyPair() {
     rsaState.publicKey = DEFAULT_PUBLIC_KEY;

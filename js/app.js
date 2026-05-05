@@ -146,7 +146,9 @@ renderHistory(els, state.history);
 refreshIcons();
 
 els.encryptBtn.addEventListener("click", () => runCrypto("encrypt"));
-els.decryptBtn.addEventListener("click", () => runCrypto("decrypt"));
+if (els.decryptBtn) {
+  els.decryptBtn.addEventListener("click", () => runCrypto("decrypt"));
+}
 els.algorithmSelect.addEventListener("change", updateAlgorithmMeta);
 els.plainText.addEventListener("input", updateCharCount);
 els.generateRsaBtn.addEventListener("click", generateRsaKeys);

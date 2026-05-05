@@ -108,9 +108,11 @@ const toolSection = () => `
         <p id="errorMessage" class="mt-3 min-h-5 text-sm font-semibold text-rose-600"></p>
         <p id="successMessage" class="min-h-5 text-sm font-semibold text-emerald-600"></p>
         <div class="mt-3 flex flex-col gap-3 sm:flex-row">
+          <!--
           <button id="decryptBtn" class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-white/80 px-5 py-3 text-sm font-bold text-blue-700 transition hover:-translate-y-0.5 hover:bg-blue-50">
             <i data-lucide="repeat-2" class="h-4 w-4"></i> Decrypt
           </button>
+          -->
           <button id="copyBtn" class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/70 bg-white/70 px-5 py-3 text-sm font-bold text-slate-700 transition hover:-translate-y-0.5 hover:text-blue-600">
             <i data-lucide="copy" class="h-4 w-4"></i> Copy
           </button>
@@ -217,6 +219,7 @@ export const setMessage = (els, message = "", type = "success") => {
 
 export const setBusy = (els, busy) => {
   [els.encryptBtn, els.decryptBtn, els.generateRsaBtn, els.importRsaBtn].forEach((button) => {
+    if (!button) return;
     button.disabled = busy;
     button.classList.toggle("opacity-60", busy);
     button.classList.toggle("cursor-wait", busy);
