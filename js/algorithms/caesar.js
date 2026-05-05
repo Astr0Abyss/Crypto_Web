@@ -1,4 +1,12 @@
-const CAESAR_SHIFT = 3;
+const DEFAULT_CAESAR_SHIFT = 3;
+
+const parseCaesarShift = (key) => {
+  const shift = Number.parseInt(key, 10);
+  if (Number.isNaN(shift)) {
+    throw new Error("Caesar cipher needs a numeric shift, for example 3.");
+  }
+  return shift;
+};
 
 const rotateLetter = (char, shift) => {
   const code = char.charCodeAt(0);
@@ -12,17 +20,18 @@ const rotateLetter = (char, shift) => {
   return String.fromCharCode(((code - base + normalizedShift) % 26) + base);
 };
 
-const transformCaesar = (text, direction) => {
-  return [...text].map((char) => rotateLetter(char, CAESAR_SHIFT * direction)).join("");
+const transformCaesar = (text, key, direction) => {
+  const shift = parseCaesarShift(key || DEFAULT_CAESAR_SHIFT);
+  return [...text].map((char) => rotateLetter(char, shift * direction)).join("");
 };
 
 export const caesarCipher = {
   id: "caesar",
   label: "Caesar Cipher",
-  keyLabel: "Fixed Shift",
-  defaultKey: String(CAESAR_SHIFT),
-  keyPlaceholder: "Fixed at 3",
-  description: "Classic Caesar cipher. Each alphabet letter moves by exactly 3 positions.",
-  encrypt: (text) => transformCaesar(text, 1),
-  decrypt: (text) => transformCaesar(text, -1),
+  keyLabel: "Shift Value",
+  defaultKey: String(DEFAULT_CAESAR_SHIFT),
+  keyPlaceholder: "Example: 3",
+  description: "Classic Caesar cipher. Each alphabet letter moves by your chosen shift value.",
+  encrypt: (text, key) => transformCaesar(text, key, 1),
+  decrypt: (text, key) => transformCaesar(text, key, -1),
 };

@@ -48,7 +48,7 @@ const updateAlgorithmMeta = () => {
   els.keyLabel.textContent = algorithm.keyLabel;
   els.keyInput.value = algorithm.defaultKey;
   els.keyInput.placeholder = algorithm.keyPlaceholder;
-  els.keyInput.disabled = algorithm.id === "caesar";
+  els.keyInput.disabled = false;
   els.keyInput.classList.toggle("opacity-60", els.keyInput.disabled);
   els.rsaPanel.classList.toggle("hidden", !isRsa);
 
