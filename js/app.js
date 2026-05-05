@@ -48,9 +48,15 @@ const updateAlgorithmMeta = () => {
   els.keyLabel.textContent = algorithm.keyLabel;
   els.keyInput.value = algorithm.defaultKey;
   els.keyInput.placeholder = algorithm.keyPlaceholder;
-  els.keyInput.disabled = isRsa || algorithm.id === "caesar";
+  els.keyInput.disabled = algorithm.id === "caesar";
   els.keyInput.classList.toggle("opacity-60", els.keyInput.disabled);
   els.rsaPanel.classList.toggle("hidden", !isRsa);
+
+  if (isRsa) {
+    els.rsaPublicKey.value = algorithms.rsa.defaultKey;
+    els.rsaPrivateKey.value = "391,235";
+  }
+
   setMessage(els);
 };
 
@@ -61,7 +67,9 @@ const runCrypto = async (mode) => {
 
     const algorithm = selectedAlgorithm();
     const source = mode === "encrypt" ? els.plainText.value : els.outputText.value;
-    const key = els.keyInput.value.trim();
+    const key = algorithm.id === "rsa" && mode === "decrypt"
+      ? els.rsaPrivateKey.value.trim()
+      : els.keyInput.value.trim();
 
     if (!source.trim()) {
       throw new Error(`Enter text to ${mode}.`);
@@ -91,12 +99,13 @@ const generateRsaKeys = async () => {
   try {
     setMessage(els);
     setBusy(els, true);
-    els.rsaStatus.textContent = "Generating 2048-bit RSA-OAEP key pair...";
+    els.rsaStatus.textContent = "Loading sample RSA key pair...";
     const keys = await algorithms.rsa.generateKeyPair();
-    els.rsaPublicKey.value = keys.publicJwk;
-    els.rsaPrivateKey.value = keys.privateJwk;
-    els.rsaStatus.textContent = "Auto-generated key pair is active.";
-    setMessage(els, "RSA key pair generated.");
+    els.keyInput.value = keys.publicKey;
+    els.rsaPublicKey.value = keys.publicKey;
+    els.rsaPrivateKey.value = keys.privateKey;
+    els.rsaStatus.textContent = "Sample keys active: public (391,3), private (391,235).";
+    setMessage(els, "RSA sample key pair loaded.");
   } catch (error) {
     setMessage(els, error.message, "error");
   } finally {
@@ -109,11 +118,12 @@ const importRsaKeys = async () => {
     setMessage(els);
     setBusy(els, true);
     await algorithms.rsa.importKeyPair({
-      publicJwk: els.rsaPublicKey.value,
-      privateJwk: els.rsaPrivateKey.value,
+      publicKey: els.rsaPublicKey.value,
+      privateKey: els.rsaPrivateKey.value,
     });
-    els.rsaStatus.textContent = "Manual JWK key material is active.";
-    setMessage(els, "Manual RSA key material imported.");
+    els.keyInput.value = els.rsaPublicKey.value;
+    els.rsaStatus.textContent = "Manual RSA keys are active.";
+    setMessage(els, "Manual RSA keys imported.");
   } catch (error) {
     setMessage(els, error.message, "error");
   } finally {
@@ -141,6 +151,11 @@ els.algorithmSelect.addEventListener("change", updateAlgorithmMeta);
 els.plainText.addEventListener("input", updateCharCount);
 els.generateRsaBtn.addEventListener("click", generateRsaKeys);
 els.importRsaBtn.addEventListener("click", importRsaKeys);
+els.rsaPublicKey.addEventListener("input", () => {
+  if (selectedAlgorithm().id === "rsa") {
+    els.keyInput.value = els.rsaPublicKey.value;
+  }
+});
 els.copyPublicKeyBtn.addEventListener("click", () => copyText(els.rsaPublicKey.value, "No public key to copy.", "Public key copied."));
 els.copyPrivateKeyBtn.addEventListener("click", () => copyText(els.rsaPrivateKey.value, "No private key to copy.", "Private key copied."));
 

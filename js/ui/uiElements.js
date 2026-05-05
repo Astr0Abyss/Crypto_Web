@@ -125,30 +125,30 @@ const rsaKeyPanel = () => `
     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
       <div>
         <p class="font-bold text-blue-700">RSA key management</p>
-        <p id="rsaStatus">Generate a key pair or paste manual JWK keys.</p>
+        <p id="rsaStatus">Use auto sample keys or enter manual textbook RSA keys.</p>
       </div>
       <div class="grid grid-cols-2 gap-2 sm:flex">
-        <button id="generateRsaBtn" class="rounded-xl bg-white/80 px-3 py-2 font-bold text-blue-700 transition hover:bg-blue-50">Auto Generate</button>
+        <button id="generateRsaBtn" class="rounded-xl bg-white/80 px-3 py-2 font-bold text-blue-700 transition hover:bg-blue-50">Auto Fill</button>
         <button id="importRsaBtn" class="rounded-xl bg-white/80 px-3 py-2 font-bold text-blue-700 transition hover:bg-blue-50">Use Manual</button>
       </div>
     </div>
     <div class="mt-4 grid gap-3 lg:grid-cols-2">
       <div>
         <div class="mb-2 flex items-center justify-between gap-2">
-          <label class="font-bold text-slate-700" for="rsaPublicKey">Public Key JWK</label>
+          <label class="font-bold text-slate-700" for="rsaPublicKey">Public Key (n,e)</label>
           <button id="copyPublicKeyBtn" class="rounded-lg bg-white/80 px-2 py-1 font-bold text-blue-700">Copy</button>
         </div>
-        <textarea id="rsaPublicKey" class="field min-h-32 p-3 font-mono text-[11px]" placeholder="Paste or auto-generate public JWK..."></textarea>
+        <input id="rsaPublicKey" class="field h-12 px-3 font-mono text-sm" placeholder="Example: 391,3" />
       </div>
       <div>
         <div class="mb-2 flex items-center justify-between gap-2">
-          <label class="font-bold text-slate-700" for="rsaPrivateKey">Private Key JWK</label>
+          <label class="font-bold text-slate-700" for="rsaPrivateKey">Private Key (n,d)</label>
           <button id="copyPrivateKeyBtn" class="rounded-lg bg-white/80 px-2 py-1 font-bold text-blue-700">Copy</button>
         </div>
-        <textarea id="rsaPrivateKey" class="field min-h-32 p-3 font-mono text-[11px]" placeholder="Paste or auto-generate private JWK..."></textarea>
+        <input id="rsaPrivateKey" class="field h-12 px-3 font-mono text-sm" placeholder="Example: 391,235" />
       </div>
     </div>
-    <p class="mt-3">RSA-OAEP encrypts short text directly. For large files, use hybrid encryption: AES for data, RSA for the AES key.</p>
+    <p class="mt-3">Alphabet mapping: A=1, B=2, ... Z=26. Spaces map to 0. Encrypt: c = m^e mod n. Decrypt: m = c^d mod n.</p>
   </div>
 `;
 
