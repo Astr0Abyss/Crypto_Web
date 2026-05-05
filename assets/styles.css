@@ -1,0 +1,89 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(96, 165, 250, 0.22), transparent 30%),
+    radial-gradient(circle at 78% 8%, rgba(191, 219, 254, 0.36), transparent 34%),
+    linear-gradient(135deg, #f8fbff 0%, #eff6ff 42%, #ffffff 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(30, 64, 175, 0.14) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: linear-gradient(to bottom, black, transparent 72%);
+  opacity: 0.45;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 20px 70px rgba(37, 99, 235, 0.10);
+  backdrop-filter: blur(24px);
+}
+
+.glass-soft {
+  background: rgba(255, 255, 255, 0.48);
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(18px);
+}
+
+.field {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgba(191, 219, 254, 0.72);
+  background: rgba(255, 255, 255, 0.58);
+  color: #0f172a;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.field:focus {
+  border-color: rgba(37, 99, 235, 0.58);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+}
+
+.key-line {
+  stroke-dasharray: 620;
+  stroke-dashoffset: 620;
+  animation: draw 2.8s ease forwards;
+}
+
+.float-key {
+  animation: floatKey 7s ease-in-out infinite;
+}
+
+.chart-line {
+  stroke-dasharray: 480;
+  stroke-dashoffset: 480;
+  animation: draw 2.2s ease forwards;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes floatKey {
+  0%, 100% {
+    transform: translateY(0) rotate(-7deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(-4deg);
+  }
+}
