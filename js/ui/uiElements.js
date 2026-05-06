@@ -1,12 +1,50 @@
 export const renderAppShell = () => {
   document.querySelector("#app").innerHTML = `
-    <main class="relative mx-auto flex min-h-screen max-w-[1220px] items-center p-2 sm:p-4 lg:p-8">
-      <!-- Sidebar temporarily commented out for focused encryption/decryption view. -->
-      <!-- Header and mobile navigation temporarily commented out. -->
-      <section class="min-w-0 flex-1 rounded-3xl p-0 sm:p-2 lg:p-4">
-        <!-- Hero section temporarily commented out. -->
+    <main class="relative mx-auto flex min-h-screen max-w-[1500px] gap-4 p-2 sm:p-4 lg:gap-5 lg:p-8">
+      <aside class="glass sticky top-6 hidden h-[calc(100vh-3rem)] w-[84px] shrink-0 flex-col items-center justify-between rounded-3xl px-3 py-7 lg:flex">
+        <div class="flex flex-col items-center gap-8">
+          <div class="grid h-12 w-12 place-items-center rounded-2xl bg-blue-600 text-white shadow-glow">
+            <i data-lucide="shield-keyhole" class="h-6 w-6"></i>
+          </div>
+          <nav class="flex flex-col gap-4 text-slate-500">
+            ${["layout-dashboard", "lock", "unlock-keyhole", "braces", "history"].map((icon, index) => `
+              <a href="${index === 0 ? "#" : index < 3 ? "#tool" : index === 3 ? "#algorithms" : "#activity"}" class="grid h-12 w-12 place-items-center rounded-2xl ${index === 0 ? "bg-white/70 text-blue-600 shadow-sm" : ""} transition hover:-translate-y-0.5 hover:bg-white/70 hover:text-blue-600">
+                <i data-lucide="${icon}" class="h-5 w-5"></i>
+              </a>
+            `).join("")}
+          </nav>
+        </div>
+        <button class="grid h-12 w-12 place-items-center rounded-2xl text-slate-500 transition hover:bg-white/70 hover:text-blue-600" title="Settings">
+          <i data-lucide="settings" class="h-5 w-5"></i>
+        </button>
+      </aside>
+
+      <section class="glass min-w-0 flex-1 rounded-3xl p-3 shadow-glass sm:p-5 lg:rounded-[2rem] lg:p-8">
+        <header class="mb-5 flex items-center justify-between gap-4 sm:mb-8">
+          <div class="flex items-center gap-3">
+            <span class="grid h-10 w-10 place-items-center rounded-2xl bg-blue-600/10 text-blue-600">
+              <i data-lucide="shield-check" class="h-5 w-5"></i>
+            </span>
+            <h1 class="text-lg font-bold tracking-tight sm:text-xl">Crypto <span class="text-blue-600">Toolkit</span></h1>
+          </div>
+          <nav class="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
+            <a href="#algorithms" class="transition hover:text-blue-600">Algorithms</a>
+            <a href="#tool" class="transition hover:text-blue-600">Toolkit</a>
+            <a href="#activity" class="transition hover:text-blue-600">History</a>
+          </nav>
+        </header>
+
+        <nav class="glass-soft mb-5 grid grid-cols-5 gap-2 rounded-2xl p-2 text-slate-500 lg:hidden">
+          ${["layout-dashboard", "lock", "unlock-keyhole", "braces", "history"].map((icon, index) => `
+            <a href="${index === 0 ? "#" : index < 3 ? "#tool" : index === 3 ? "#algorithms" : "#activity"}" class="grid h-11 place-items-center rounded-xl ${index === 0 ? "bg-white/70 text-blue-600" : ""} transition hover:bg-white/70 hover:text-blue-600">
+              <i data-lucide="${icon}" class="h-5 w-5"></i>
+            </a>
+          `).join("")}
+        </nav>
+
+        ${heroSection()}
         ${toolSection()}
-        <!-- Activity/history section temporarily commented out. -->
+        ${activitySection()}
       </section>
     </main>
   `;
@@ -89,6 +127,7 @@ const toolSection = () => `
           </div>
         </div>
         ${rsaKeyPanel()}
+        ${hillFilePanel()}
         <div class="mt-5 flex flex-col gap-3 sm:flex-row">
           <button id="encryptBtn" class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-3 text-sm font-bold text-white shadow-glow transition hover:-translate-y-0.5">
             <i data-lucide="lock-keyhole" class="h-4 w-4"></i> Encrypt
@@ -108,11 +147,9 @@ const toolSection = () => `
         <p id="errorMessage" class="mt-3 min-h-5 text-sm font-semibold text-rose-600"></p>
         <p id="successMessage" class="min-h-5 text-sm font-semibold text-emerald-600"></p>
         <div class="mt-3 flex flex-col gap-3 sm:flex-row">
-          <!--
           <button id="decryptBtn" class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-white/80 px-5 py-3 text-sm font-bold text-blue-700 transition hover:-translate-y-0.5 hover:bg-blue-50">
             <i data-lucide="repeat-2" class="h-4 w-4"></i> Decrypt
           </button>
-          -->
           <button id="copyBtn" class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/70 bg-white/70 px-5 py-3 text-sm font-bold text-slate-700 transition hover:-translate-y-0.5 hover:text-blue-600">
             <i data-lucide="copy" class="h-4 w-4"></i> Copy
           </button>
@@ -120,6 +157,24 @@ const toolSection = () => `
       </article>
     </div>
   </section>
+`;
+
+const hillFilePanel = () => `
+  <div id="hillFilePanel" class="mt-4 hidden rounded-2xl border border-blue-100 bg-blue-50/70 p-4 text-xs leading-6 text-slate-600">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <p class="font-bold text-blue-700">Hill file mode</p>
+        <p id="fileStatus">Upload a photo or PDF to encrypt/decrypt bytes with the Hill matrix key.</p>
+      </div>
+      <a id="fileDownloadLink" class="hidden rounded-xl bg-white/80 px-3 py-2 font-bold text-blue-700 transition hover:bg-blue-50" download>Download Result</a>
+    </div>
+    <div class="mt-4 grid gap-3 lg:grid-cols-[1fr_auto_auto]">
+      <input id="fileInput" class="field px-3 py-3 text-sm" type="file" accept="image/*,.pdf,application/pdf" />
+      <button id="fileEncryptBtn" class="rounded-xl bg-white/80 px-4 py-3 font-bold text-blue-700 transition hover:bg-blue-50">Encrypt File</button>
+      <button id="fileDecryptBtn" class="rounded-xl bg-white/80 px-4 py-3 font-bold text-blue-700 transition hover:bg-blue-50">Decrypt File</button>
+    </div>
+    <p class="mt-3">Use a key whose determinant is invertible modulo 256. The default <code>3,3,2,5</code> works for images/PDF bytes.</p>
+  </div>
 `;
 
 const rsaKeyPanel = () => `
@@ -204,6 +259,12 @@ export const getElements = () => ({
   rsaPrivateKey: document.querySelector("#rsaPrivateKey"),
   copyPublicKeyBtn: document.querySelector("#copyPublicKeyBtn"),
   copyPrivateKeyBtn: document.querySelector("#copyPrivateKeyBtn"),
+  hillFilePanel: document.querySelector("#hillFilePanel"),
+  fileInput: document.querySelector("#fileInput"),
+  fileEncryptBtn: document.querySelector("#fileEncryptBtn"),
+  fileDecryptBtn: document.querySelector("#fileDecryptBtn"),
+  fileStatus: document.querySelector("#fileStatus"),
+  fileDownloadLink: document.querySelector("#fileDownloadLink"),
 });
 
 export const populateAlgorithmOptions = (select, algorithms) => {
@@ -218,7 +279,7 @@ export const setMessage = (els, message = "", type = "success") => {
 };
 
 export const setBusy = (els, busy) => {
-  [els.encryptBtn, els.decryptBtn, els.generateRsaBtn, els.importRsaBtn].forEach((button) => {
+  [els.encryptBtn, els.decryptBtn, els.generateRsaBtn, els.importRsaBtn, els.fileEncryptBtn, els.fileDecryptBtn].forEach((button) => {
     if (!button) return;
     button.disabled = busy;
     button.classList.toggle("opacity-60", busy);

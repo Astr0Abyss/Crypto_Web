@@ -43,6 +43,7 @@ const addHistory = (type, algorithm, input, output) => {
 const updateAlgorithmMeta = () => {
   const algorithm = selectedAlgorithm();
   const isRsa = algorithm.id === "rsa";
+  const isHill = algorithm.id === "hill";
 
   els.algorithmDescription.textContent = algorithm.description;
   els.keyLabel.textContent = algorithm.keyLabel;
@@ -51,6 +52,7 @@ const updateAlgorithmMeta = () => {
   els.keyInput.disabled = false;
   els.keyInput.classList.toggle("opacity-60", els.keyInput.disabled);
   els.rsaPanel.classList.toggle("hidden", !isRsa);
+  els.hillFilePanel.classList.toggle("hidden", !isHill);
 
   if (isRsa) {
     els.rsaPublicKey.value = algorithms.rsa.defaultKey;
@@ -140,6 +142,41 @@ const copyText = async (value, emptyMessage, successMessage) => {
   setMessage(els, successMessage);
 };
 
+const processHillFile = async (mode) => {
+  try {
+    setMessage(els);
+    setBusy(els, true);
+
+    const file = els.fileInput.files?.[0];
+    if (!file) {
+      throw new Error("Choose a photo or PDF file first.");
+    }
+
+    const algorithm = selectedAlgorithm();
+    if (!algorithm.encryptFile || !algorithm.decryptFile) {
+      throw new Error("File mode is available for Hill Cipher only.");
+    }
+
+    const source = await file.arrayBuffer();
+    const result = mode === "encrypt"
+      ? algorithm.encryptFile(source, els.keyInput.value.trim())
+      : algorithm.decryptFile(source, els.keyInput.value.trim());
+
+    const blob = new Blob([result], { type: mode === "encrypt" ? "application/octet-stream" : file.type || "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+    const suffix = mode === "encrypt" ? ".hill" : ".decrypted";
+    els.fileDownloadLink.href = url;
+    els.fileDownloadLink.download = `${file.name}${suffix}`;
+    els.fileDownloadLink.classList.remove("hidden");
+    els.fileStatus.textContent = `${mode === "encrypt" ? "Encrypted" : "Decrypted"} ${file.name}. Use Download Result.`;
+    setMessage(els, `File ${mode}ed successfully.`);
+  } catch (error) {
+    setMessage(els, error.message, "error");
+  } finally {
+    setBusy(els, false);
+  }
+};
+
 populateAlgorithmOptions(els.algorithmSelect, algorithms);
 updateAlgorithmMeta();
 renderHistory(els, state.history);
@@ -160,6 +197,8 @@ els.rsaPublicKey.addEventListener("input", () => {
 });
 els.copyPublicKeyBtn.addEventListener("click", () => copyText(els.rsaPublicKey.value, "No public key to copy.", "Public key copied."));
 els.copyPrivateKeyBtn.addEventListener("click", () => copyText(els.rsaPrivateKey.value, "No private key to copy.", "Private key copied."));
+els.fileEncryptBtn.addEventListener("click", () => processHillFile("encrypt"));
+els.fileDecryptBtn.addEventListener("click", () => processHillFile("decrypt"));
 
 els.copyBtn.addEventListener("click", () => copyText(els.outputText.value, "Nothing to copy yet.", "Output copied."));
 
