@@ -3,8 +3,20 @@ export const renderAppShell = () => {
     <main class="relative mx-auto flex min-h-screen max-w-[1500px] gap-4 p-2 sm:p-4 lg:gap-5 lg:p-8">
       <aside class="glass sticky top-6 hidden h-[calc(100vh-3rem)] w-[84px] shrink-0 flex-col items-center justify-between rounded-3xl px-3 py-7 lg:flex">
         <div class="flex flex-col items-center gap-8">
-          <div class="grid h-12 w-12 place-items-center rounded-2xl bg-blue-600 text-white shadow-glow">
-            <i data-lucide="shield-keyhole" class="h-6 w-6"></i>
+          <div class="brand-logo grid h-14 w-14 place-items-center rounded-2xl text-white shadow-glow">
+            <svg viewBox="0 0 64 64" class="h-10 w-10" fill="none" aria-label="Crypto Toolkit logo">
+              <path d="M32 6 51 13v15c0 13.5-7.6 23.5-19 30-11.4-6.5-19-16.5-19-30V13L32 6Z" fill="url(#logoShield)" />
+              <path d="M24 31v-5a8 8 0 0 1 16 0v5" stroke="white" stroke-width="4" stroke-linecap="round" />
+              <rect x="20" y="29" width="24" height="18" rx="5" fill="white" fill-opacity=".92" />
+              <path d="M32 35v6" stroke="#2563eb" stroke-width="4" stroke-linecap="round" />
+              <circle cx="32" cy="35" r="3" fill="#2563eb" />
+              <defs>
+                <linearGradient id="logoShield" x1="13" y1="6" x2="54" y2="58" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#2563eb" />
+                  <stop offset="1" stop-color="#22d3ee" />
+                </linearGradient>
+              </defs>
+            </svg>
           </div>
           <nav class="flex flex-col gap-4 text-slate-500">
             ${["layout-dashboard", "lock", "unlock-keyhole", "braces", "history"].map((icon, index) => `
@@ -85,6 +97,8 @@ const heroSection = () => `
 
 const calculationFlowSection = () => `
   <section id="calculation-flow" class="cyber-flow glass mt-6 overflow-hidden rounded-3xl p-5 sm:p-6">
+    <div id="binaryRain" class="binary-rain" aria-hidden="true"></div>
+    <div id="binarySweep" class="binary-sweep" aria-hidden="true"></div>
     <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <div class="cyber-badge mb-2 inline-flex items-center gap-2 rounded-full border border-cyan-200/70 bg-slate-950/90 px-3 py-1 text-xs font-bold text-cyan-200 shadow-glow">
@@ -101,7 +115,23 @@ const calculationFlowSection = () => `
     <div class="cyber-lane mb-4 hidden h-2 overflow-hidden rounded-full bg-slate-950/90 lg:block">
       <span></span>
     </div>
-    <div id="flowSteps" class="grid gap-3 lg:grid-cols-3"></div>
+    <div class="trace-layout">
+      <div class="transform-preview rounded-2xl border border-cyan-200/50 bg-white/58 p-4 backdrop-blur-xl">
+        <div class="mb-4 flex items-center justify-between gap-3">
+          <span class="rounded-full bg-slate-950 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wide text-cyan-200">live transform</span>
+          <span id="transformStatus" class="font-mono text-xs font-bold text-cyan-700">listening...</span>
+        </div>
+        <div id="transformPreview" class="space-y-3"></div>
+      </div>
+      <div id="flowSteps" class="flow-steps-grid grid gap-3 lg:grid-cols-3"></div>
+      <div class="binary-console rounded-2xl border border-cyan-200/40 bg-slate-950/95 p-4 font-mono text-[11px] leading-5 text-cyan-100">
+        <div class="mb-3 flex items-center justify-between gap-3 text-cyan-300">
+          <span class="font-bold">live binary stream</span>
+          <span id="binaryStatus" class="text-cyan-500">listening...</span>
+        </div>
+        <div id="binaryStream" class="binary-stream"></div>
+      </div>
+    </div>
   </section>
 `;
 
@@ -167,6 +197,13 @@ const toolSection = () => `
         </div>
         <label class="text-sm font-bold text-slate-700" for="outputText">Output Area</label>
         <textarea id="outputText" class="field mt-2 min-h-[19rem] p-4 font-mono text-sm leading-6" placeholder="Encrypted or decrypted output appears here..."></textarea>
+        <div id="rsaOutputMap" class="rsa-output-map mt-3 hidden rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+          <div class="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <p class="text-sm font-extrabold text-slate-900">RSA Number to Character</p>
+            <span id="rsaOutputMode" class="font-mono text-xs font-bold text-blue-700">A=1 ... Z=26</span>
+          </div>
+          <div id="rsaOutputMapList" class="mapping-row"></div>
+        </div>
         <p id="errorMessage" class="mt-3 min-h-5 text-sm font-semibold text-rose-600"></p>
         <p id="successMessage" class="min-h-5 text-sm font-semibold text-emerald-600"></p>
         <div class="mt-3 flex flex-col gap-3 sm:flex-row">
@@ -260,6 +297,9 @@ const activitySection = () => `
 export const getElements = () => ({
   plainText: document.querySelector("#plainText"),
   outputText: document.querySelector("#outputText"),
+  rsaOutputMap: document.querySelector("#rsaOutputMap"),
+  rsaOutputMode: document.querySelector("#rsaOutputMode"),
+  rsaOutputMapList: document.querySelector("#rsaOutputMapList"),
   algorithmSelect: document.querySelector("#algorithmSelect"),
   algorithmDescription: document.querySelector("#algorithmDescription"),
   keyInput: document.querySelector("#keyInput"),
@@ -292,6 +332,12 @@ export const getElements = () => ({
   flowSubtitle: document.querySelector("#flowSubtitle"),
   flowMode: document.querySelector("#flowMode"),
   flowSteps: document.querySelector("#flowSteps"),
+  binaryRain: document.querySelector("#binaryRain"),
+  binarySweep: document.querySelector("#binarySweep"),
+  transformPreview: document.querySelector("#transformPreview"),
+  transformStatus: document.querySelector("#transformStatus"),
+  binaryStream: document.querySelector("#binaryStream"),
+  binaryStatus: document.querySelector("#binaryStatus"),
 });
 
 export const populateAlgorithmOptions = (select, algorithms) => {
@@ -312,6 +358,20 @@ export const setBusy = (els, busy) => {
     button.classList.toggle("opacity-60", busy);
     button.classList.toggle("cursor-wait", busy);
   });
+};
+
+export const renderRsaOutputMap = (els, text = "", mode = "mapping") => {
+  if (!els.rsaOutputMap || !els.rsaOutputMapList) return;
+
+  const pairs = [...text.toUpperCase()]
+    .filter((char) => char === " " || (char >= "A" && char <= "Z"))
+    .slice(0, 24)
+    .map((char) => `${char === " " ? 0 : char.charCodeAt(0) - 64} -> ${char === " " ? "space" : char}`);
+
+  els.rsaOutputMode.textContent = mode;
+  els.rsaOutputMapList.innerHTML = pairs.length
+    ? pairs.map((pair) => `<span>${escapeHtml(pair)}</span>`).join("")
+    : "<span>Enter RSA text to see A=1 ... Z=26</span>";
 };
 
 export const renderHistory = (els, history) => {
@@ -343,10 +403,72 @@ const escapeHtml = (value) => String(value)
   .replace(/"/g, "&quot;")
   .replace(/'/g, "&#039;");
 
-export const renderCalculationFlow = (els, { algorithm, mode = "standby", steps = [] }) => {
+const binaryFromText = (value) => {
+  const source = value || "CRYPTO";
+  return [...source].slice(0, 44)
+    .map((char) => char.charCodeAt(0).toString(2).padStart(8, "0"))
+    .join(" ");
+};
+
+const renderBinaryChips = (value) => {
+  return binaryFromText(value)
+    .split(" ")
+    .slice(0, 42)
+    .map((byte, index) => `<span style="--chip-delay: ${index * 34}ms">${byte}</span>`)
+    .join("");
+};
+
+const buildBinaryRain = (seed) => {
+  const binary = binaryFromText(seed).replace(/\s/g, "") || "01010101";
+  return Array.from({ length: 18 }, (_, column) => {
+    const chars = Array.from({ length: 18 }, (_, row) => binary[(column * 7 + row * 3) % binary.length]).join("");
+    return `<span style="--column: ${column}; --rain-delay: ${-(column % 9) * 0.42}s; --rain-speed: ${3.4 + (column % 5) * 0.34}s">${chars}</span>`;
+  }).join("");
+};
+
+const buildBinarySweep = (seed) => {
+  const binary = binaryFromText(seed).replace(/\s/g, "") || "01010101";
+  return Array.from({ length: 7 }, (_, row) => {
+    const sequence = Array.from({ length: 96 }, (_, index) => binary[(row * 11 + index * 5) % binary.length]).join("");
+    return `<span style="--sweep-row: ${row}; --sweep-delay: ${row * -0.34}s">${sequence}</span>`;
+  }).join("");
+};
+
+const renderTransformPreview = ({ input = "", key = "", result = "", pairs = [] }) => {
+  const keyText = key || "No key";
+  const visiblePairs = pairs.slice(0, 6);
+
+  return `
+    <div class="grid gap-3 sm:grid-cols-2">
+      <div>
+        <p class="mb-1 text-xs font-bold uppercase tracking-wide text-slate-500">key</p>
+        <div class="preview-box">${escapeHtml(keyText)}</div>
+      </div>
+      <div>
+        <p class="mb-1 text-xs font-bold uppercase tracking-wide text-slate-500">mode</p>
+        <div class="preview-box">${escapeHtml(pairs.length ? "character mapping" : "watching")}</div>
+      </div>
+    </div>
+    <div>
+      <p class="mb-1 text-xs font-bold uppercase tracking-wide text-slate-500">sample mappings</p>
+      <div class="mapping-row">
+        ${visiblePairs.length ? visiblePairs.map((pair) => `<span>${escapeHtml(pair)}</span>`).join("") : "<span>type text to trace</span>"}
+      </div>
+    </div>
+  `;
+};
+
+export const renderCalculationFlow = (els, { algorithm, mode = "standby", steps = [], binarySeed = "", preview = {} }) => {
   els.flowTitle.textContent = `${algorithm.label} Calculation Flow`;
   els.flowSubtitle.textContent = algorithm.description;
   els.flowMode.textContent = mode;
+  const statusText = mode.includes("live") ? "streaming input" : mode;
+  els.transformStatus.textContent = statusText;
+  els.binaryStatus.textContent = statusText;
+  els.transformPreview.innerHTML = renderTransformPreview(preview);
+  els.binaryStream.innerHTML = renderBinaryChips(binarySeed);
+  els.binaryRain.innerHTML = buildBinaryRain(binarySeed);
+  els.binarySweep.innerHTML = buildBinarySweep(binarySeed);
   els.flowSteps.innerHTML = steps.map((step, index) => `
     <article class="flow-card relative overflow-hidden rounded-2xl border border-cyan-100/70 bg-white/65 p-4 shadow-sm backdrop-blur-lg" style="--flow-delay: ${index * 160}ms">
       <div class="absolute right-3 top-3 font-mono text-4xl font-black text-blue-100">0${index + 1}</div>
@@ -354,7 +476,7 @@ export const renderCalculationFlow = (els, { algorithm, mode = "standby", steps 
         <p class="mb-2 inline-flex rounded-full bg-slate-950 px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-wide text-cyan-200">${escapeHtml(step.label)}</p>
         <h4 class="text-sm font-extrabold text-slate-900">${escapeHtml(step.title)}</h4>
         <p class="mt-2 text-xs leading-5 text-slate-600">${escapeHtml(step.detail)}</p>
-        <pre class="mt-3 overflow-auto rounded-xl bg-slate-950 p-3 text-[11px] leading-5 text-cyan-100">${escapeHtml(step.formula)}</pre>
+        <pre class="mt-3 overflow-hidden rounded-xl bg-slate-950 p-3 text-[11px] leading-5 text-cyan-100">${escapeHtml(step.formula)}</pre>
       </div>
     </article>
   `).join("");

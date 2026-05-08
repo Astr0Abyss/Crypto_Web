@@ -73,12 +73,24 @@ body::before {
   animation: draw 2.2s ease forwards;
 }
 
+.brand-logo {
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.34), transparent 28%),
+    linear-gradient(135deg, #2563eb, #0ea5e9);
+  box-shadow: 0 18px 38px rgba(37, 99, 235, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
 .cyber-flow {
   position: relative;
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(239, 246, 255, 0.56)),
     radial-gradient(circle at 15% 20%, rgba(34, 211, 238, 0.18), transparent 28%),
     radial-gradient(circle at 86% 12%, rgba(37, 99, 235, 0.16), transparent 26%);
+}
+
+.cyber-flow > * {
+  position: relative;
+  z-index: 1;
 }
 
 .cyber-flow::before {
@@ -92,6 +104,199 @@ body::before {
   opacity: 0.55;
   transform: translateX(-100%);
   animation: cyberSweep 4.5s linear infinite;
+}
+
+.binary-rain {
+  position: absolute;
+  top: 116px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.28;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 72%, transparent 100%);
+}
+
+.binary-rain span {
+  position: absolute;
+  top: -38%;
+  left: calc((100% / 18) * var(--column));
+  width: calc(100% / 18);
+  color: rgba(8, 145, 178, 0.82);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  line-height: 1.65;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(34, 211, 238, 0.48);
+  writing-mode: vertical-rl;
+  animation: binaryFall var(--rain-speed) linear infinite;
+  animation-delay: var(--rain-delay);
+}
+
+.binary-sweep {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .binary-sweep {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    left: clamp(340px, 42vw, 640px);
+    z-index: 0;
+    display: block;
+    height: 96px;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0.3;
+    mask-image: linear-gradient(90deg, transparent 0%, black 14%, black 92%, transparent 100%);
+  }
+}
+
+.binary-sweep span {
+  position: absolute;
+  top: calc(var(--sweep-row) * 17px);
+  left: -18%;
+  width: 138%;
+  color: rgba(14, 116, 144, 0.58);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  white-space: nowrap;
+  text-shadow: 0 0 10px rgba(125, 211, 252, 0.46);
+  animation: binarySweepMove 5.4s linear infinite;
+  animation-delay: var(--sweep-delay);
+}
+
+.binary-console {
+  position: relative;
+  overflow: hidden;
+  min-height: auto;
+  border-color: rgba(125, 211, 252, 0.36);
+  background:
+    radial-gradient(circle at 12% 20%, rgba(14, 165, 233, 0.11), transparent 28%),
+    linear-gradient(180deg, rgba(2, 6, 23, 0.97), rgba(8, 19, 36, 0.95));
+  box-shadow: inset 0 0 34px rgba(34, 211, 238, 0.1), 0 18px 48px rgba(15, 23, 42, 0.14), 0 0 0 1px rgba(125, 211, 252, 0.08);
+}
+
+.binary-console::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent, rgba(125, 211, 252, 0.16), transparent),
+    repeating-linear-gradient(180deg, rgba(125, 211, 252, 0.08) 0 1px, transparent 1px 8px);
+  transform: translateX(-100%);
+  animation: terminalScan 2.2s linear infinite;
+}
+
+.binary-console::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--pulse-x, 50%) 50%, rgba(125, 211, 252, 0.13), transparent 34%);
+  animation: binaryPulse 3s ease-in-out infinite;
+}
+
+.binary-stream {
+  position: relative;
+  display: grid;
+  max-height: 162px;
+  grid-template-columns: repeat(auto-fit, minmax(74px, 1fr));
+  gap: 8px;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.binary-stream span {
+  display: inline-flex;
+  min-height: 31px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(125, 211, 252, 0.34);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(14, 116, 144, 0.48), rgba(8, 47, 73, 0.62));
+  color: #bae6fd;
+  text-shadow: 0 0 10px rgba(125, 211, 252, 0.62);
+  box-shadow: inset 0 0 16px rgba(125, 211, 252, 0.1), 0 0 12px rgba(125, 211, 252, 0.06);
+  animation: byteFlip 900ms ease both, binaryFlicker 1.25s steps(2, end) infinite, chipGlow 2.8s ease-in-out infinite;
+  animation-delay: var(--chip-delay), calc(var(--chip-delay) + 800ms), calc(var(--chip-delay) + 420ms);
+}
+
+.trace-layout {
+  display: grid;
+  gap: 14px;
+  align-items: stretch;
+}
+
+@media (min-width: 1024px) {
+  .trace-layout {
+    grid-template-columns: minmax(280px, 0.72fr) minmax(0, 2.28fr);
+  }
+
+  .binary-console {
+    grid-column: 1 / -1;
+  }
+}
+
+.transform-preview {
+  height: 100%;
+  min-width: 0;
+  box-shadow: 0 18px 52px rgba(37, 99, 235, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+.preview-box {
+  min-height: 42px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.58);
+  padding: 10px 12px;
+  color: #0f172a;
+  font-size: 12px;
+  line-height: 1.55;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.preview-box.output {
+  border-color: rgba(34, 211, 238, 0.35);
+  background: rgba(240, 249, 255, 0.72);
+  color: #075985;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+.mapping-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.mapping-row span {
+  border: 1px solid rgba(34, 211, 238, 0.28);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.92);
+  padding: 6px 9px;
+  color: #a5f3fc;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+  font-weight: 800;
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.14);
+  animation: byteFlip 520ms ease both;
+}
+
+.flow-steps-grid {
+  align-items: stretch;
+  grid-auto-rows: 1fr;
+  height: 100%;
+  min-width: 0;
 }
 
 .cyber-badge {
@@ -111,8 +316,26 @@ body::before {
 .flow-card {
   opacity: 0;
   transform: translateY(10px);
+  min-width: 0;
+  min-height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(239, 246, 255, 0.42));
+  border-color: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 18px 48px rgba(37, 99, 235, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   animation: flowCardIn 560ms ease forwards, flowCardPulse 2.8s ease-in-out infinite;
   animation-delay: var(--flow-delay), calc(var(--flow-delay) + 620ms);
+}
+
+@media (min-width: 1024px) {
+  .flow-card {
+    display: flex;
+  }
+
+  .flow-card > div.relative {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+  }
 }
 
 .flow-card::before {
@@ -127,8 +350,15 @@ body::before {
 }
 
 .flow-card pre {
+  width: 100%;
   border: 1px solid rgba(34, 211, 238, 0.22);
   box-shadow: inset 0 0 18px rgba(34, 211, 238, 0.08);
+  min-height: 78px;
+  margin-top: 14px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  overflow: hidden;
 }
 
 @keyframes draw {
@@ -149,6 +379,63 @@ body::before {
 @keyframes cyberSweep {
   0% { transform: translateX(-100%); }
   55%, 100% { transform: translateX(100%); }
+}
+
+@keyframes binaryFall {
+  from { transform: translateY(-10%); }
+  to { transform: translateY(155%); }
+}
+
+@keyframes binarySweepMove {
+  from {
+    transform: translateX(-8%);
+  }
+  to {
+    transform: translateX(8%);
+  }
+}
+
+@keyframes terminalScan {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+@keyframes binaryFlicker {
+  0%, 100% { opacity: 1; filter: brightness(1.08); }
+  50% { opacity: 0.72; filter: brightness(1.42); }
+}
+
+@keyframes binaryPulse {
+  0%, 100% {
+    opacity: 0.22;
+    --pulse-x: 12%;
+  }
+  50% {
+    opacity: 0.62;
+    --pulse-x: 88%;
+  }
+}
+
+@keyframes chipGlow {
+  0%, 100% { box-shadow: inset 0 0 18px rgba(34, 211, 238, 0.16), 0 0 14px rgba(34, 211, 238, 0.08); }
+  50% { box-shadow: inset 0 0 22px rgba(34, 211, 238, 0.28), 0 0 24px rgba(34, 211, 238, 0.2); }
+}
+
+@keyframes byteFlip {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+    border-color: rgba(34, 211, 238, 0.1);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.02);
+    border-color: rgba(34, 211, 238, 0.78);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @keyframes cyberPulse {

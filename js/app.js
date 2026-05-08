@@ -5,6 +5,7 @@ import {
   renderCalculationFlow,
   renderAppShell,
   renderHistory,
+  renderRsaOutputMap,
   setBusy,
   setMessage,
 } from "./ui/uiElements.js";
@@ -76,12 +77,46 @@ const buildFlowSteps = (algorithm, mode, input = "", key = "", result = "") => {
   return flows[algorithm.id] || [];
 };
 
+const updateRsaOutputMap = (text = els.plainText.value, mode = "plain text mapping") => {
+  const isRsa = selectedAlgorithm().id === "rsa";
+  els.rsaOutputMap.classList.toggle("hidden", !isRsa);
+  if (isRsa) {
+    renderRsaOutputMap(els, text, mode);
+  }
+};
+
+const buildPreviewPairs = (algorithm, input = "", result = "") => {
+  const sourceChars = [...input].slice(0, 6);
+  const resultChars = [...result].slice(0, 6);
+
+  if (!sourceChars.length) return [];
+
+  if (algorithm.id === "rsa") {
+    return sourceChars.map((char, index) => `${char.toUpperCase()} -> ${result.split(/\s+/)[index] || "?"}`);
+  }
+
+  if (algorithm.id === "hill") {
+    const pairs = input.toUpperCase().replace(/[^A-Z]/g, "").match(/.{1,2}/g) || [];
+    const outPairs = result.match(/.{1,2}/g) || [];
+    return pairs.slice(0, 6).map((pair, index) => `${pair.padEnd(2, "X")} -> ${outPairs[index] || "?"}`);
+  }
+
+  return sourceChars.map((char, index) => `${char} -> ${resultChars[index] || "?"}`);
+};
+
 const updateCalculationFlow = (mode = "standby", input = "", key = "", result = "") => {
   const algorithm = selectedAlgorithm();
   renderCalculationFlow(els, {
     algorithm,
     mode,
     steps: buildFlowSteps(algorithm, mode, input, key || algorithm.defaultKey, result),
+    binarySeed: `${algorithm.label}|${mode}|${input}|${key}|${result}`,
+    preview: {
+      input,
+      key: key || algorithm.defaultKey,
+      result,
+      pairs: buildPreviewPairs(algorithm, input, result),
+    },
   });
   refreshIcons();
 };
@@ -117,10 +152,12 @@ const updateAlgorithmMeta = () => {
   els.keyInput.classList.toggle("opacity-60", els.keyInput.disabled);
   els.rsaPanel.classList.toggle("hidden", !isRsa);
   els.hillFilePanel.classList.toggle("hidden", !isHill);
+  els.rsaOutputMap.classList.toggle("hidden", !isRsa);
 
   if (isRsa) {
     els.rsaPublicKey.value = algorithms.rsa.defaultKey;
     els.rsaPrivateKey.value = "391,235";
+    updateRsaOutputMap(els.plainText.value, "plain text mapping");
   }
 
   setMessage(els);
@@ -148,11 +185,17 @@ const runCrypto = async (mode) => {
       els.outputText.value = result;
       addHistory("Encrypted", algorithm.label, source, result);
       updateCalculationFlow("encryption", source, key, result);
+      if (algorithm.id === "rsa") {
+        updateRsaOutputMap(source, "plain number values");
+      }
       setMessage(els, "Encrypted successfully.");
     } else {
       els.plainText.value = result;
       addHistory("Decrypted", algorithm.label, source, result);
       updateCalculationFlow("decryption", source, key, result);
+      if (algorithm.id === "rsa") {
+        updateRsaOutputMap(result, "decrypted character values");
+      }
       setMessage(els, "Decrypted successfully.");
     }
 
@@ -263,6 +306,7 @@ els.algorithmSelect.addEventListener("change", updateAlgorithmMeta);
 els.plainText.addEventListener("input", () => {
   updateCharCount();
   previewCalculationFlow();
+  updateRsaOutputMap(els.plainText.value, "plain text mapping");
 });
 els.keyInput.addEventListener("input", previewCalculationFlow);
 els.generateRsaBtn.addEventListener("click", generateRsaKeys);
@@ -289,6 +333,7 @@ els.clearBtn.addEventListener("click", () => {
   els.plainText.value = "";
   els.outputText.value = "";
   updateCharCount();
+  updateRsaOutputMap("", "plain text mapping");
   setMessage(els, "Cleared.");
 });
 
