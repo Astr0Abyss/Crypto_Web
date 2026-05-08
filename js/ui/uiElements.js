@@ -44,6 +44,7 @@ export const renderAppShell = () => {
 
         ${heroSection()}
         ${toolSection()}
+        ${calculationFlowSection()}
         ${activitySection()}
       </section>
     </main>
@@ -79,6 +80,25 @@ const heroSection = () => `
         ${wireframeKey()}
       </div>
     </div>
+  </section>
+`;
+
+const calculationFlowSection = () => `
+  <section id="calculation-flow" class="glass mt-6 overflow-hidden rounded-3xl p-5 sm:p-6">
+    <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <div class="mb-2 inline-flex items-center gap-2 rounded-full border border-blue-200/80 bg-slate-950/90 px-3 py-1 text-xs font-bold text-cyan-200 shadow-glow">
+          <i data-lucide="scan-line" class="h-3.5 w-3.5"></i>
+          Cipher Trace
+        </div>
+        <h3 id="flowTitle" class="text-xl font-extrabold text-slate-950">Calculation Flow</h3>
+        <p id="flowSubtitle" class="mt-1 text-sm text-slate-500">Select an algorithm or run encryption to inspect the process.</p>
+      </div>
+      <div class="rounded-2xl border border-cyan-200/70 bg-slate-950 px-4 py-3 font-mono text-xs font-bold text-cyan-200">
+        <span class="text-cyan-400">mode:</span> <span id="flowMode">standby</span>
+      </div>
+    </div>
+    <div id="flowSteps" class="grid gap-3 lg:grid-cols-3"></div>
   </section>
 `;
 
@@ -169,7 +189,7 @@ const hillFilePanel = () => `
       <a id="fileDownloadLink" class="hidden rounded-xl bg-white/80 px-3 py-2 font-bold text-blue-700 transition hover:bg-blue-50" download>Download Result</a>
     </div>
     <div class="mt-4 grid gap-3 lg:grid-cols-[1fr_auto_auto]">
-      <input id="fileInput" class="field px-3 py-3 text-sm" type="file" accept="image/*,.pdf,application/pdf" />
+      <input id="fileInput" class="field px-3 py-3 text-sm" type="file" accept="image/*,.pdf,.hill,application/pdf,application/octet-stream" />
       <button id="fileEncryptBtn" class="rounded-xl bg-white/80 px-4 py-3 font-bold text-blue-700 transition hover:bg-blue-50">Encrypt File</button>
       <button id="fileDecryptBtn" class="rounded-xl bg-white/80 px-4 py-3 font-bold text-blue-700 transition hover:bg-blue-50">Decrypt File</button>
     </div>
@@ -265,6 +285,10 @@ export const getElements = () => ({
   fileDecryptBtn: document.querySelector("#fileDecryptBtn"),
   fileStatus: document.querySelector("#fileStatus"),
   fileDownloadLink: document.querySelector("#fileDownloadLink"),
+  flowTitle: document.querySelector("#flowTitle"),
+  flowSubtitle: document.querySelector("#flowSubtitle"),
+  flowMode: document.querySelector("#flowMode"),
+  flowSteps: document.querySelector("#flowSteps"),
 });
 
 export const populateAlgorithmOptions = (select, algorithms) => {
@@ -306,5 +330,29 @@ export const renderHistory = (els, history) => {
       </div>
       <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">${item.time}</span>
     </div>
+  `).join("");
+};
+
+const escapeHtml = (value) => String(value)
+  .replace(/&/g, "&amp;")
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;")
+  .replace(/'/g, "&#039;");
+
+export const renderCalculationFlow = (els, { algorithm, mode = "standby", steps = [] }) => {
+  els.flowTitle.textContent = `${algorithm.label} Calculation Flow`;
+  els.flowSubtitle.textContent = algorithm.description;
+  els.flowMode.textContent = mode;
+  els.flowSteps.innerHTML = steps.map((step, index) => `
+    <article class="relative overflow-hidden rounded-2xl border border-cyan-100/70 bg-white/65 p-4 shadow-sm backdrop-blur-lg">
+      <div class="absolute right-3 top-3 font-mono text-4xl font-black text-blue-100">0${index + 1}</div>
+      <div class="relative">
+        <p class="mb-2 inline-flex rounded-full bg-slate-950 px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-wide text-cyan-200">${escapeHtml(step.label)}</p>
+        <h4 class="text-sm font-extrabold text-slate-900">${escapeHtml(step.title)}</h4>
+        <p class="mt-2 text-xs leading-5 text-slate-600">${escapeHtml(step.detail)}</p>
+        <pre class="mt-3 overflow-auto rounded-xl bg-slate-950 p-3 text-[11px] leading-5 text-cyan-100">${escapeHtml(step.formula)}</pre>
+      </div>
+    </article>
   `).join("");
 };

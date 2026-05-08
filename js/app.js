@@ -2,6 +2,7 @@ import { algorithms } from "./algorithms/index.js";
 import {
   getElements,
   populateAlgorithmOptions,
+  renderCalculationFlow,
   renderAppShell,
   renderHistory,
   setBusy,
@@ -40,6 +41,51 @@ const addHistory = (type, algorithm, input, output) => {
   refreshIcons();
 };
 
+const buildFlowSteps = (algorithm, mode, input = "", key = "", result = "") => {
+  const sampleInput = input.slice(0, 24) || "payload";
+  const sampleResult = result.slice(0, 48) || "awaiting result";
+
+  const flows = {
+    caesar: [
+      { label: "input", title: "Normalize Shift", detail: "Read the numeric shift from the key field and wrap it inside the alphabet range.", formula: `k = ${key || algorithm.defaultKey}\nk' = ((k mod 26) + 26) mod 26` },
+      { label: "encrypt", title: "Move Letters", detail: "Each A-Z/a-z character is shifted while punctuation, spaces, and numbers pass through unchanged.", formula: mode === "decrypt" ? "P = (C - k') mod 26" : "C = (P + k') mod 26" },
+      { label: "output", title: "Rebuild Text", detail: "Characters keep their original case and positions after transformation.", formula: `${sampleInput} -> ${sampleResult}` },
+    ],
+    shift: [
+      { label: "key", title: "Custom Shift", detail: "Shift Cipher uses the same alphabet rotation idea but always expects a user-defined numeric shift.", formula: `shift = ${key || algorithm.defaultKey}` },
+      { label: "formula", title: mode === "decrypt" ? "Reverse Rotation" : "Forward Rotation", detail: "The direction changes based on encryption or decryption.", formula: mode === "decrypt" ? "plain = (cipher - shift) mod 26" : "cipher = (plain + shift) mod 26" },
+      { label: "output", title: "Preserve Non-Letters", detail: "Symbols are ignored by the math and copied into the output.", formula: `${sampleInput} -> ${sampleResult}` },
+    ],
+    rsa: [
+      { label: "map", title: "Alphabet Mapping", detail: "Plain letters become numbers before RSA math runs.", formula: "A=1, B=2, ... Z=26, space=0" },
+      { label: "rsa", title: mode === "decrypt" ? "Private Exponent" : "Public Exponent", detail: "Textbook RSA modular exponentiation transforms every mapped number.", formula: mode === "decrypt" ? "m = c^d mod n\nkey = (n,d)" : "c = m^e mod n\nkey = (n,e)" },
+      { label: "result", title: "Number Stream", detail: "Encrypted output is a space-separated number stream; decrypted output maps numbers back to letters.", formula: `${sampleInput} -> ${sampleResult}` },
+    ],
+    vigenere: [
+      { label: "keyword", title: "Repeat Keyword", detail: "The alphabetic keyword repeats across letters only; spaces and punctuation do not consume key characters.", formula: `key = ${(key || algorithm.defaultKey).toUpperCase()}` },
+      { label: "shift", title: "Per-Letter Shift", detail: "Each key letter becomes a shift value from A=0 to Z=25.", formula: mode === "decrypt" ? "P_i = (C_i - K_i) mod 26" : "C_i = (P_i + K_i) mod 26" },
+      { label: "output", title: "Stream Result", detail: "The keyword creates a different shift at each letter position.", formula: `${sampleInput} -> ${sampleResult}` },
+    ],
+    hill: [
+      { label: "matrix", title: "Build 2x2 Matrix", detail: "The key becomes an invertible matrix. Text uses modulo 26 and files use modulo 256.", formula: `K = [a b; c d]\nkey = ${key || algorithm.defaultKey}` },
+      { label: "blocks", title: "Process Pairs", detail: "Text is grouped into two-letter vectors; file bytes are grouped into two-byte vectors.", formula: mode === "decrypt" ? "P = K^-1 x C mod 26/256" : "C = K x P mod 26/256" },
+      { label: "output", title: "Recombine Blocks", detail: "Text blocks become letters again. File blocks become downloadable encrypted/decrypted bytes.", formula: `${sampleInput} -> ${sampleResult}` },
+    ],
+  };
+
+  return flows[algorithm.id] || [];
+};
+
+const updateCalculationFlow = (mode = "standby", input = "", key = "", result = "") => {
+  const algorithm = selectedAlgorithm();
+  renderCalculationFlow(els, {
+    algorithm,
+    mode,
+    steps: buildFlowSteps(algorithm, mode, input, key || algorithm.defaultKey, result),
+  });
+  refreshIcons();
+};
+
 const updateAlgorithmMeta = () => {
   const algorithm = selectedAlgorithm();
   const isRsa = algorithm.id === "rsa";
@@ -60,6 +106,7 @@ const updateAlgorithmMeta = () => {
   }
 
   setMessage(els);
+  updateCalculationFlow();
 };
 
 const runCrypto = async (mode) => {
@@ -82,10 +129,12 @@ const runCrypto = async (mode) => {
     if (mode === "encrypt") {
       els.outputText.value = result;
       addHistory("Encrypted", algorithm.label, source, result);
+      updateCalculationFlow("encryption", source, key, result);
       setMessage(els, "Encrypted successfully.");
     } else {
       els.plainText.value = result;
       addHistory("Decrypted", algorithm.label, source, result);
+      updateCalculationFlow("decryption", source, key, result);
       setMessage(els, "Decrypted successfully.");
     }
 
@@ -164,11 +213,16 @@ const processHillFile = async (mode) => {
 
     const blob = new Blob([result], { type: mode === "encrypt" ? "application/octet-stream" : file.type || "application/octet-stream" });
     const url = URL.createObjectURL(blob);
-    const suffix = mode === "encrypt" ? ".hill" : ".decrypted";
+    const downloadName = mode === "encrypt"
+      ? `${file.name}.hill`
+      : file.name.endsWith(".hill")
+        ? file.name.slice(0, -5)
+        : `${file.name}.decrypted`;
     els.fileDownloadLink.href = url;
-    els.fileDownloadLink.download = `${file.name}${suffix}`;
+    els.fileDownloadLink.download = downloadName;
     els.fileDownloadLink.classList.remove("hidden");
     els.fileStatus.textContent = `${mode === "encrypt" ? "Encrypted" : "Decrypted"} ${file.name}. Use Download Result.`;
+    updateCalculationFlow(`${mode} file`, file.name, els.keyInput.value.trim(), downloadName);
     setMessage(els, `File ${mode}ed successfully.`);
   } catch (error) {
     setMessage(els, error.message, "error");
@@ -180,7 +234,6 @@ const processHillFile = async (mode) => {
 populateAlgorithmOptions(els.algorithmSelect, algorithms);
 updateAlgorithmMeta();
 renderHistory(els, state.history);
-refreshIcons();
 
 els.encryptBtn.addEventListener("click", () => runCrypto("encrypt"));
 if (els.decryptBtn) {

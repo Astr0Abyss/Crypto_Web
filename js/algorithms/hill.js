@@ -1,4 +1,6 @@
 const DEFAULT_HILL_KEY = "3,3,2,5";
+const HILL_FILE_MAGIC = [72, 73, 76, 76];
+const HILL_HEADER_LENGTH = 8;
 
 const positiveMod = (value, modulus) => ((value % modulus) + modulus) % modulus;
 
@@ -94,6 +96,33 @@ const transformBytes = (arrayBuffer, key, decrypt = false) => {
   return result.buffer;
 };
 
+const addHillHeader = (encryptedBuffer, originalLength) => {
+  const encrypted = new Uint8Array(encryptedBuffer);
+  const output = new Uint8Array(HILL_HEADER_LENGTH + encrypted.length);
+  output.set(HILL_FILE_MAGIC, 0);
+  new DataView(output.buffer).setUint32(4, originalLength, true);
+  output.set(encrypted, HILL_HEADER_LENGTH);
+  return output.buffer;
+};
+
+const readHillPayload = (arrayBuffer) => {
+  const source = new Uint8Array(arrayBuffer);
+  const hasHeader = source.length >= HILL_HEADER_LENGTH
+    && HILL_FILE_MAGIC.every((byte, index) => source[index] === byte);
+
+  if (!hasHeader) {
+    return {
+      payload: arrayBuffer,
+      originalLength: null,
+    };
+  }
+
+  return {
+    payload: source.slice(HILL_HEADER_LENGTH).buffer,
+    originalLength: new DataView(source.buffer, source.byteOffset, source.byteLength).getUint32(4, true),
+  };
+};
+
 export const hillCipher = {
   id: "hill",
   label: "Hill Cipher",
@@ -103,6 +132,10 @@ export const hillCipher = {
   description: "Hill cipher uses a 2x2 invertible matrix. Text uses modulo 26; files use modulo 256 bytes.",
   encrypt: (text, key) => transformText(text, key, false),
   decrypt: (text, key) => transformText(text, key, true),
-  encryptFile: (arrayBuffer, key) => transformBytes(arrayBuffer, key, false),
-  decryptFile: (arrayBuffer, key) => transformBytes(arrayBuffer, key, true),
+  encryptFile: (arrayBuffer, key) => addHillHeader(transformBytes(arrayBuffer, key, false), arrayBuffer.byteLength),
+  decryptFile: (arrayBuffer, key) => {
+    const { payload, originalLength } = readHillPayload(arrayBuffer);
+    const decrypted = new Uint8Array(transformBytes(payload, key, true));
+    return originalLength === null ? decrypted.buffer : decrypted.slice(0, originalLength).buffer;
+  },
 };
