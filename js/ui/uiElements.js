@@ -84,10 +84,10 @@ const heroSection = () => `
 `;
 
 const calculationFlowSection = () => `
-  <section id="calculation-flow" class="glass mt-6 overflow-hidden rounded-3xl p-5 sm:p-6">
+  <section id="calculation-flow" class="cyber-flow glass mt-6 overflow-hidden rounded-3xl p-5 sm:p-6">
     <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <div class="mb-2 inline-flex items-center gap-2 rounded-full border border-blue-200/80 bg-slate-950/90 px-3 py-1 text-xs font-bold text-cyan-200 shadow-glow">
+        <div class="cyber-badge mb-2 inline-flex items-center gap-2 rounded-full border border-cyan-200/70 bg-slate-950/90 px-3 py-1 text-xs font-bold text-cyan-200 shadow-glow">
           <i data-lucide="scan-line" class="h-3.5 w-3.5"></i>
           Cipher Trace
         </div>
@@ -97,6 +97,9 @@ const calculationFlowSection = () => `
       <div class="rounded-2xl border border-cyan-200/70 bg-slate-950 px-4 py-3 font-mono text-xs font-bold text-cyan-200">
         <span class="text-cyan-400">mode:</span> <span id="flowMode">standby</span>
       </div>
+    </div>
+    <div class="cyber-lane mb-4 hidden h-2 overflow-hidden rounded-full bg-slate-950/90 lg:block">
+      <span></span>
     </div>
     <div id="flowSteps" class="grid gap-3 lg:grid-cols-3"></div>
   </section>
@@ -345,7 +348,7 @@ export const renderCalculationFlow = (els, { algorithm, mode = "standby", steps 
   els.flowSubtitle.textContent = algorithm.description;
   els.flowMode.textContent = mode;
   els.flowSteps.innerHTML = steps.map((step, index) => `
-    <article class="relative overflow-hidden rounded-2xl border border-cyan-100/70 bg-white/65 p-4 shadow-sm backdrop-blur-lg">
+    <article class="flow-card relative overflow-hidden rounded-2xl border border-cyan-100/70 bg-white/65 p-4 shadow-sm backdrop-blur-lg" style="--flow-delay: ${index * 160}ms">
       <div class="absolute right-3 top-3 font-mono text-4xl font-black text-blue-100">0${index + 1}</div>
       <div class="relative">
         <p class="mb-2 inline-flex rounded-full bg-slate-950 px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-wide text-cyan-200">${escapeHtml(step.label)}</p>

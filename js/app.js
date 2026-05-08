@@ -86,6 +86,24 @@ const updateCalculationFlow = (mode = "standby", input = "", key = "", result = 
   refreshIcons();
 };
 
+const previewCalculationFlow = () => {
+  const algorithm = selectedAlgorithm();
+  const source = els.plainText.value;
+  const key = algorithm.id === "rsa" ? els.rsaPublicKey.value.trim() || els.keyInput.value.trim() : els.keyInput.value.trim();
+
+  if (!source.trim()) {
+    updateCalculationFlow("live standby", "", key, "");
+    return;
+  }
+
+  try {
+    const result = algorithm.encrypt(source, key);
+    updateCalculationFlow("live encryption", source, key, result);
+  } catch (error) {
+    updateCalculationFlow("input watch", source, key, error.message);
+  }
+};
+
 const updateAlgorithmMeta = () => {
   const algorithm = selectedAlgorithm();
   const isRsa = algorithm.id === "rsa";
@@ -106,7 +124,7 @@ const updateAlgorithmMeta = () => {
   }
 
   setMessage(els);
-  updateCalculationFlow();
+  previewCalculationFlow();
 };
 
 const runCrypto = async (mode) => {
@@ -156,6 +174,7 @@ const generateRsaKeys = async () => {
     els.rsaPublicKey.value = keys.publicKey;
     els.rsaPrivateKey.value = keys.privateKey;
     els.rsaStatus.textContent = "Sample keys active: public (391,3), private (391,235).";
+    previewCalculationFlow();
     setMessage(els, "RSA sample key pair loaded.");
   } catch (error) {
     setMessage(els, error.message, "error");
@@ -174,6 +193,7 @@ const importRsaKeys = async () => {
     });
     els.keyInput.value = els.rsaPublicKey.value;
     els.rsaStatus.textContent = "Manual RSA keys are active.";
+    previewCalculationFlow();
     setMessage(els, "Manual RSA keys imported.");
   } catch (error) {
     setMessage(els, error.message, "error");
@@ -240,12 +260,22 @@ if (els.decryptBtn) {
   els.decryptBtn.addEventListener("click", () => runCrypto("decrypt"));
 }
 els.algorithmSelect.addEventListener("change", updateAlgorithmMeta);
-els.plainText.addEventListener("input", updateCharCount);
+els.plainText.addEventListener("input", () => {
+  updateCharCount();
+  previewCalculationFlow();
+});
+els.keyInput.addEventListener("input", previewCalculationFlow);
 els.generateRsaBtn.addEventListener("click", generateRsaKeys);
 els.importRsaBtn.addEventListener("click", importRsaKeys);
 els.rsaPublicKey.addEventListener("input", () => {
   if (selectedAlgorithm().id === "rsa") {
     els.keyInput.value = els.rsaPublicKey.value;
+    previewCalculationFlow();
+  }
+});
+els.rsaPrivateKey.addEventListener("input", () => {
+  if (selectedAlgorithm().id === "rsa") {
+    previewCalculationFlow();
   }
 });
 els.copyPublicKeyBtn.addEventListener("click", () => copyText(els.rsaPublicKey.value, "No public key to copy.", "Public key copied."));
