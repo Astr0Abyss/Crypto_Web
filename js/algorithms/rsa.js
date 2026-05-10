@@ -1,5 +1,5 @@
-const DEFAULT_PUBLIC_KEY = "391,3";
-const DEFAULT_PRIVATE_KEY = "391,235";
+const DEFAULT_PUBLIC_KEY = "1147,7";
+const DEFAULT_PRIVATE_KEY = "1147,463";
 
 const alphabetToNumber = (char) => {
   if (char === " ") return 0;
@@ -38,8 +38,70 @@ const parseKey = (keyText, exponentName) => {
   }
 
   return {
+    nNumber: n,
+    exponentNumber: exponent,
     n: BigInt(n),
     exponent: BigInt(exponent),
+  };
+};
+
+const gcd = (a, b) => {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+
+  while (y) {
+    [x, y] = [y, x % y];
+  }
+
+  return x;
+};
+
+const extendedGcd = (a, b) => {
+  if (b === 0) return { gcd: a, x: 1, y: 0 };
+  const result = extendedGcd(b, a % b);
+  return {
+    gcd: result.gcd,
+    x: result.y,
+    y: result.x - Math.floor(a / b) * result.y,
+  };
+};
+
+const modInverse = (value, modulus) => {
+  const result = extendedGcd(value, modulus);
+  if (result.gcd !== 1) {
+    throw new Error(`RSA exponent ${value} is not coprime with phi(n)=${modulus}.`);
+  }
+
+  return ((result.x % modulus) + modulus) % modulus;
+};
+
+const factorModulus = (n) => {
+  for (let factor = 2; factor <= Math.floor(Math.sqrt(n)); factor += 1) {
+    if (n % factor === 0) {
+      return [factor, n / factor];
+    }
+  }
+
+  throw new Error("Cannot derive private key because n is not factorable as a small demo modulus.");
+};
+
+const derivePrivateKeyFromPublic = (publicKey) => {
+  const { nNumber, exponentNumber: e } = parseKey(publicKey, "e");
+  const [p, q] = factorModulus(nNumber);
+
+  const phi = (p - 1) * (q - 1);
+  const d = modInverse(e, phi);
+  const warning = Math.min(p, q) <= 26
+    ? "Use primes greater than 26 for full A-Z round-trip support."
+    : "";
+
+  return {
+    publicKey: `${nNumber},${e}`,
+    privateKey: `${nNumber},${d}`,
+    p,
+    q,
+    phi,
+    warning,
   };
 };
 
@@ -81,10 +143,15 @@ export const rsaCipher = {
     };
   },
 
+  derivePrivateKey(publicKey) {
+    return derivePrivateKeyFromPublic(publicKey);
+  },
+
   importKeyPair({ publicKey, privateKey }) {
     if (publicKey.trim()) {
-      parseKey(publicKey, "e");
-      rsaState.publicKey = publicKey.trim();
+      const derived = derivePrivateKeyFromPublic(publicKey.trim());
+      rsaState.publicKey = derived.publicKey;
+      rsaState.privateKey = derived.privateKey;
     }
 
     if (privateKey.trim()) {

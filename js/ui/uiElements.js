@@ -199,8 +199,8 @@ const toolSection = () => `
         <textarea id="outputText" class="field mt-2 min-h-[19rem] p-4 font-mono text-sm leading-6" placeholder="Encrypted or decrypted output appears here..."></textarea>
         <div id="rsaOutputMap" class="rsa-output-map mt-3 hidden rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
           <div class="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-            <p class="text-sm font-extrabold text-slate-900">RSA Number to Character</p>
-            <span id="rsaOutputMode" class="font-mono text-xs font-bold text-blue-700">A=1 ... Z=26</span>
+            <p class="text-sm font-extrabold text-slate-900">Output as Character</p>
+            <span id="rsaOutputMode" class="font-mono text-xs font-bold text-blue-700">RSA decoded word</span>
           </div>
           <div id="rsaOutputMapList" class="mapping-row"></div>
         </div>
@@ -255,33 +255,34 @@ const rsaKeyPanel = () => `
           <label class="font-bold text-slate-700" for="rsaPublicKey">Public Key (n,e)</label>
           <button id="copyPublicKeyBtn" class="rounded-lg bg-white/80 px-2 py-1 font-bold text-blue-700">Copy</button>
         </div>
-        <input id="rsaPublicKey" class="field h-12 px-3 font-mono text-sm" placeholder="Example: 391,3" />
+        <input id="rsaPublicKey" class="field h-12 px-3 font-mono text-sm" placeholder="Example: 1147,7" />
       </div>
       <div>
         <div class="mb-2 flex items-center justify-between gap-2">
           <label class="font-bold text-slate-700" for="rsaPrivateKey">Private Key (n,d)</label>
           <button id="copyPrivateKeyBtn" class="rounded-lg bg-white/80 px-2 py-1 font-bold text-blue-700">Copy</button>
         </div>
-        <input id="rsaPrivateKey" class="field h-12 px-3 font-mono text-sm" placeholder="Example: 391,235" />
+        <input id="rsaPrivateKey" class="field h-12 px-3 font-mono text-sm" placeholder="Example: 1147,463" />
       </div>
     </div>
-    <p class="mt-3">Alphabet mapping: A=1, B=2, ... Z=26. Spaces map to 0. Encrypt: c = m^e mod n. Decrypt: m = c^d mod n.</p>
+    <p class="mt-3">Alphabet mapping: A=1, B=2, ... Z=26. Spaces map to 0. Use demo primes above 26 so every alphabet value decrypts correctly.</p>
   </div>
 `;
 
 const activitySection = () => `
   <section id="activity" class="mt-6 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-    <article class="glass rounded-3xl p-5 sm:p-6">
+    <article class="activity-card glass rounded-3xl p-5 sm:p-6">
       <div class="mb-5 flex items-start justify-between gap-4">
         <div><h3 class="text-lg font-extrabold">Encryption Activity</h3><p class="text-sm text-slate-500">Overview of recent encryption/decryption activity</p></div>
         <button class="rounded-2xl border border-white/70 bg-white/70 px-4 py-2 text-xs font-bold text-slate-600">This Month</button>
       </div>
-      <svg class="h-56 w-full" viewBox="0 0 720 240" preserveAspectRatio="none" aria-label="Dummy encryption activity chart">
-        <defs><linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#3b82f6" stop-opacity="0.18" /><stop offset="100%" stop-color="#3b82f6" stop-opacity="0" /></linearGradient></defs>
+      <svg class="activity-chart w-full" viewBox="0 0 720 240" preserveAspectRatio="none" aria-label="Encryption activity chart">
+        <defs><linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#3b82f6" stop-opacity="0.16" /><stop offset="72%" stop-color="#3b82f6" stop-opacity="0.07" /><stop offset="100%" stop-color="#3b82f6" stop-opacity="0" /></linearGradient></defs>
         <g stroke="#dbeafe" stroke-width="1"><path d="M0 52H720M0 100H720M0 148H720M0 196H720" /></g>
-        <path d="M0 190 C60 112 92 82 150 92 S245 144 300 122 S395 96 450 137 S548 78 610 105 S675 142 720 86 L720 240 L0 240 Z" fill="url(#chartFill)" />
-        <path class="chart-line" d="M0 190 C60 112 92 82 150 92 S245 144 300 122 S395 96 450 137 S548 78 610 105 S675 142 720 86" fill="none" stroke="#3b82f6" stroke-width="3" />
-        <path class="chart-line" d="M0 206 C68 150 104 125 162 134 S256 168 320 154 S408 132 470 162 S566 118 620 139 S680 168 720 142" fill="none" stroke="#8b5cf6" stroke-width="2.5" opacity="0.82" />
+        <path id="activityFill" d="" fill="url(#chartFill)" />
+        <path id="encryptLine" class="chart-line chart-line-blue chart-line-live" d="" fill="none" stroke="#3b82f6" stroke-width="3" />
+        <path id="decryptLine" class="chart-line chart-line-purple chart-line-live" d="" fill="none" stroke="#8b5cf6" stroke-width="2.5" opacity="0.82" />
+        <g id="activityDots"></g>
       </svg>
     </article>
     <article id="algorithms" class="glass rounded-3xl p-5 sm:p-6">
@@ -314,6 +315,10 @@ export const getElements = () => ({
   charCount: document.querySelector("#charCount"),
   inputHint: document.querySelector("#inputHint"),
   historyList: document.querySelector("#historyList"),
+  activityFill: document.querySelector("#activityFill"),
+  encryptLine: document.querySelector("#encryptLine"),
+  decryptLine: document.querySelector("#decryptLine"),
+  activityDots: document.querySelector("#activityDots"),
   rsaPanel: document.querySelector("#rsaPanel"),
   rsaStatus: document.querySelector("#rsaStatus"),
   generateRsaBtn: document.querySelector("#generateRsaBtn"),
@@ -363,15 +368,16 @@ export const setBusy = (els, busy) => {
 export const renderRsaOutputMap = (els, text = "", mode = "mapping") => {
   if (!els.rsaOutputMap || !els.rsaOutputMapList) return;
 
-  const pairs = [...text.toUpperCase()]
-    .filter((char) => char === " " || (char >= "A" && char <= "Z"))
-    .slice(0, 24)
-    .map((char) => `${char === " " ? 0 : char.charCodeAt(0) - 64} -> ${char === " " ? "space" : char}`);
+  const entries = Array.isArray(text)
+    ? text
+    : [...text.toUpperCase()]
+      .filter((char) => char === " " || (char >= "A" && char <= "Z"))
+      .map((char) => `${char === " " ? "space" : char}`);
 
   els.rsaOutputMode.textContent = mode;
-  els.rsaOutputMapList.innerHTML = pairs.length
-    ? pairs.map((pair) => `<span>${escapeHtml(pair)}</span>`).join("")
-    : "<span>Enter RSA text to see A=1 ... Z=26</span>";
+  els.rsaOutputMapList.innerHTML = entries.length
+    ? entries.map((entry) => `<span>${escapeHtml(entry)}</span>`).join("")
+    : "<span>Encrypt or decrypt RSA text to see the number-character map</span>";
 };
 
 export const renderHistory = (els, history) => {
@@ -394,6 +400,59 @@ export const renderHistory = (els, history) => {
       <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">${item.time}</span>
     </div>
   `).join("");
+};
+
+const baseActivityPaths = {
+  fill: "M0 198 C62 124 100 82 158 94 S252 146 306 124 S398 96 456 137 S550 78 610 108 S675 146 720 84 L720 240 L0 240 Z",
+  encrypted: "M0 196 C58 124 96 82 154 92 S250 145 306 124 S398 96 456 137",
+  decrypted: "M0 210 C68 152 106 126 166 136 S260 168 324 154 S410 132 470 162",
+};
+
+const activityExtension = (history, type) => {
+  const count = history.filter((item) => item.type === type).length;
+  const capped = Math.min(count, 3);
+
+  if (!capped) return "";
+
+  const start = type === "Encrypted"
+    ? { x: 456, y: 137 }
+    : { x: 470, y: 162 };
+  const wave = type === "Encrypted"
+    ? [
+        [492, 126, 516, 108, 548, 118],
+        [580, 130, 602, 94, 632, 102],
+        [658, 110, 680, 130, 704, 92],
+      ]
+    : [
+        [506, 154, 528, 142, 558, 150],
+        [588, 160, 610, 132, 642, 140],
+        [666, 146, 688, 164, 704, 150],
+      ];
+
+  return wave.slice(0, capped)
+    .map(([cx1, cy1, cx2, cy2, x, y], index) => `C${index ? cx1 : (start.x + cx1) / 2} ${index ? cy1 : start.y} ${cx2} ${cy2} ${x} ${y}`)
+    .join(" ");
+};
+
+export const renderActivityChart = (els, history) => {
+  if (!els.encryptLine || !els.decryptLine || !els.activityFill || !els.activityDots) return;
+
+  const encryptPath = `${baseActivityPaths.encrypted} ${activityExtension(history, "Encrypted")}`.trim();
+  const decryptPath = `${baseActivityPaths.decrypted} ${activityExtension(history, "Decrypted")}`.trim();
+  const latestEncrypted = history[0]?.type === "Encrypted";
+
+  els.activityFill.setAttribute("d", baseActivityPaths.fill);
+  els.encryptLine.setAttribute("d", encryptPath);
+  els.decryptLine.setAttribute("d", decryptPath);
+  els.encryptLine.classList.toggle("chart-line-active", latestEncrypted && history.length > 0);
+  els.decryptLine.classList.toggle("chart-line-active", !latestEncrypted && history.length > 0);
+  els.activityDots.innerHTML = "";
+
+  [els.encryptLine, els.decryptLine].forEach((line) => {
+    line.classList.remove("chart-line-live");
+    void line.getBoundingClientRect();
+    line.classList.add("chart-line-live");
+  });
 };
 
 const escapeHtml = (value) => String(value)

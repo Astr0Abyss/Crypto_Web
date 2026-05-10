@@ -60,17 +60,53 @@ body::before {
 .key-line {
   stroke-dasharray: 620;
   stroke-dashoffset: 620;
-  animation: draw 2.8s ease forwards;
+  animation: keyTrace 7.5s ease-in-out infinite;
 }
 
 .float-key {
   animation: floatKey 7s ease-in-out infinite;
 }
 
+.activity-card {
+  min-height: 342px;
+}
+
+.activity-chart {
+  display: block;
+  height: 240px;
+  min-height: 240px;
+  max-height: 240px;
+  overflow: hidden;
+}
+
 .chart-line {
-  stroke-dasharray: 480;
-  stroke-dashoffset: 480;
-  animation: draw 2.2s ease forwards;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chart-line-live {
+  stroke-dasharray: 760;
+  stroke-dashoffset: 760;
+  animation: drawChart 1.05s ease forwards;
+}
+
+.chart-line-blue {
+  filter: drop-shadow(0 8px 12px rgba(59, 130, 246, 0.22));
+}
+
+.chart-line-purple {
+  filter: drop-shadow(0 8px 12px rgba(139, 92, 246, 0.18));
+}
+
+.chart-line-active {
+  animation: drawChart 1.05s ease forwards, lineGlow 1.8s ease-in-out;
+}
+
+.activity-dot {
+  filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.55));
+  transform-origin: center;
+  animation: activityPing 1.45s ease-in-out infinite;
 }
 
 .brand-logo {
@@ -364,6 +400,53 @@ body::before {
 @keyframes draw {
   to {
     stroke-dashoffset: 0;
+  }
+}
+
+@keyframes keyTrace {
+  0%, 12% {
+    stroke-dashoffset: 620;
+  }
+  52%, 82% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 620;
+  }
+}
+
+@keyframes drawChart {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes chartPulse {
+  0%, 100% {
+    opacity: 0.82;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes activityPing {
+  0%, 100% {
+    r: 5;
+    opacity: 0.72;
+  }
+  50% {
+    r: 8;
+    opacity: 1;
+  }
+}
+
+@keyframes lineGlow {
+  0%, 100% {
+    opacity: 0.9;
+  }
+  45% {
+    opacity: 1;
   }
 }
 

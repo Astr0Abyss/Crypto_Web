@@ -4,6 +4,7 @@ import {
   populateAlgorithmOptions,
   renderCalculationFlow,
   renderAppShell,
+  renderActivityChart,
   renderHistory,
   renderRsaOutputMap,
   setBusy,
@@ -39,6 +40,7 @@ const addHistory = (type, algorithm, input, output) => {
   });
   state.history = state.history.slice(0, 5);
   renderHistory(els, state.history);
+  renderActivityChart(els, state.history);
   refreshIcons();
 };
 
@@ -77,11 +79,61 @@ const buildFlowSteps = (algorithm, mode, input = "", key = "", result = "") => {
   return flows[algorithm.id] || [];
 };
 
-const updateRsaOutputMap = (text = els.plainText.value, mode = "plain text mapping") => {
+const updateRsaOutputMap = (text = "", mode = "RSA decoded word") => {
   const isRsa = selectedAlgorithm().id === "rsa";
   els.rsaOutputMap.classList.toggle("hidden", !isRsa);
   if (isRsa) {
     renderRsaOutputMap(els, text, mode);
+  }
+};
+
+const rsaCipherToCharacterEntries = (cipherText) => {
+  return cipherText.trim().split(/\s+/)
+    .filter((value) => /^\d+$/.test(value))
+    .slice(0, 24)
+    .map((value) => {
+      try {
+        const character = algorithms.rsa.decrypt(value, els.rsaPrivateKey.value.trim());
+        return `${value} -> ${character === " " ? "space" : character}`;
+      } catch {
+        return `${value} -> ?`;
+      }
+    });
+};
+
+const rsaCharacterToCipherEntries = (text) => {
+  return [...text.toUpperCase()]
+    .filter((char) => char === " " || (char >= "A" && char <= "Z"))
+    .slice(0, 24)
+    .map((char) => {
+      try {
+        const cipherNumber = algorithms.rsa.encrypt(char, els.rsaPublicKey.value.trim());
+        return `${char === " " ? "space" : char} -> ${cipherNumber}`;
+      } catch {
+        return `${char === " " ? "space" : char} -> ?`;
+      }
+    });
+};
+
+const syncDerivedRsaPrivateKey = ({ showMessage = false } = {}) => {
+  if (selectedAlgorithm().id !== "rsa") return false;
+
+  try {
+    const keys = algorithms.rsa.derivePrivateKey(els.rsaPublicKey.value.trim());
+    els.rsaPublicKey.value = keys.publicKey;
+    els.keyInput.value = keys.publicKey;
+    els.rsaPrivateKey.value = keys.privateKey;
+    els.rsaStatus.textContent = `Derived private key using p=${keys.p}, q=${keys.q}, phi(n)=${keys.phi}.${keys.warning ? ` ${keys.warning}` : ""}`;
+    if (showMessage) {
+      setMessage(els, "Matching RSA private key derived.");
+    }
+    return true;
+  } catch (error) {
+    els.rsaStatus.textContent = error.message;
+    if (showMessage) {
+      setMessage(els, error.message, "error");
+    }
+    return false;
   }
 };
 
@@ -156,8 +208,9 @@ const updateAlgorithmMeta = () => {
 
   if (isRsa) {
     els.rsaPublicKey.value = algorithms.rsa.defaultKey;
-    els.rsaPrivateKey.value = "391,235";
-    updateRsaOutputMap(els.plainText.value, "plain text mapping");
+    els.rsaPrivateKey.value = "1147,463";
+    els.keyInput.value = algorithms.rsa.defaultKey;
+    updateRsaOutputMap("", "RSA decoded word");
   }
 
   setMessage(els);
@@ -170,9 +223,13 @@ const runCrypto = async (mode) => {
     setBusy(els, true);
 
     const algorithm = selectedAlgorithm();
+    if (algorithm.id === "rsa" && mode === "encrypt" && !syncDerivedRsaPrivateKey({ showMessage: false })) {
+      throw new Error(els.rsaStatus.textContent);
+    }
+
     const source = mode === "encrypt" ? els.plainText.value : els.outputText.value;
-    const key = algorithm.id === "rsa" && mode === "decrypt"
-      ? els.rsaPrivateKey.value.trim()
+    const key = algorithm.id === "rsa"
+      ? (mode === "decrypt" ? els.rsaPrivateKey.value.trim() : els.rsaPublicKey.value.trim())
       : els.keyInput.value.trim();
 
     if (!source.trim()) {
@@ -186,7 +243,7 @@ const runCrypto = async (mode) => {
       addHistory("Encrypted", algorithm.label, source, result);
       updateCalculationFlow("encryption", source, key, result);
       if (algorithm.id === "rsa") {
-        updateRsaOutputMap(source, "plain number values");
+        updateRsaOutputMap(rsaCipherToCharacterEntries(result), "cipher number -> character");
       }
       setMessage(els, "Encrypted successfully.");
     } else {
@@ -194,7 +251,7 @@ const runCrypto = async (mode) => {
       addHistory("Decrypted", algorithm.label, source, result);
       updateCalculationFlow("decryption", source, key, result);
       if (algorithm.id === "rsa") {
-        updateRsaOutputMap(result, "decrypted character values");
+        updateRsaOutputMap(rsaCharacterToCipherEntries(result), "character -> cipher number");
       }
       setMessage(els, "Decrypted successfully.");
     }
@@ -216,7 +273,7 @@ const generateRsaKeys = async () => {
     els.keyInput.value = keys.publicKey;
     els.rsaPublicKey.value = keys.publicKey;
     els.rsaPrivateKey.value = keys.privateKey;
-    els.rsaStatus.textContent = "Sample keys active: public (391,3), private (391,235).";
+    els.rsaStatus.textContent = `Sample keys active: public (${keys.publicKey}), private (${keys.privateKey}).`;
     previewCalculationFlow();
     setMessage(els, "RSA sample key pair loaded.");
   } catch (error) {
@@ -234,8 +291,7 @@ const importRsaKeys = async () => {
       publicKey: els.rsaPublicKey.value,
       privateKey: els.rsaPrivateKey.value,
     });
-    els.keyInput.value = els.rsaPublicKey.value;
-    els.rsaStatus.textContent = "Manual RSA keys are active.";
+    syncDerivedRsaPrivateKey();
     previewCalculationFlow();
     setMessage(els, "Manual RSA keys imported.");
   } catch (error) {
@@ -297,6 +353,7 @@ const processHillFile = async (mode) => {
 populateAlgorithmOptions(els.algorithmSelect, algorithms);
 updateAlgorithmMeta();
 renderHistory(els, state.history);
+renderActivityChart(els, state.history);
 
 els.encryptBtn.addEventListener("click", () => runCrypto("encrypt"));
 if (els.decryptBtn) {
@@ -306,20 +363,28 @@ els.algorithmSelect.addEventListener("change", updateAlgorithmMeta);
 els.plainText.addEventListener("input", () => {
   updateCharCount();
   previewCalculationFlow();
-  updateRsaOutputMap(els.plainText.value, "plain text mapping");
+  updateRsaOutputMap("", "RSA decoded word");
 });
-els.keyInput.addEventListener("input", previewCalculationFlow);
+els.keyInput.addEventListener("input", () => {
+  if (selectedAlgorithm().id === "rsa") {
+    els.rsaPublicKey.value = els.keyInput.value;
+    syncDerivedRsaPrivateKey();
+  }
+  previewCalculationFlow();
+});
 els.generateRsaBtn.addEventListener("click", generateRsaKeys);
 els.importRsaBtn.addEventListener("click", importRsaKeys);
 els.rsaPublicKey.addEventListener("input", () => {
   if (selectedAlgorithm().id === "rsa") {
-    els.keyInput.value = els.rsaPublicKey.value;
+    syncDerivedRsaPrivateKey();
     previewCalculationFlow();
+    updateRsaOutputMap(rsaCipherToCharacterEntries(els.outputText.value), "cipher number -> character");
   }
 });
 els.rsaPrivateKey.addEventListener("input", () => {
   if (selectedAlgorithm().id === "rsa") {
     previewCalculationFlow();
+    updateRsaOutputMap(rsaCipherToCharacterEntries(els.outputText.value), "cipher number -> character");
   }
 });
 els.copyPublicKeyBtn.addEventListener("click", () => copyText(els.rsaPublicKey.value, "No public key to copy.", "Public key copied."));
@@ -333,7 +398,7 @@ els.clearBtn.addEventListener("click", () => {
   els.plainText.value = "";
   els.outputText.value = "";
   updateCharCount();
-  updateRsaOutputMap("", "plain text mapping");
+  updateRsaOutputMap("", "RSA decoded word");
   setMessage(els, "Cleared.");
 });
 
@@ -341,6 +406,7 @@ if (els.clearHistoryBtn) {
   els.clearHistoryBtn.addEventListener("click", () => {
     state.history = [];
     renderHistory(els, state.history);
+    renderActivityChart(els, state.history);
     setMessage(els, "History cleared.");
   });
 }
