@@ -56,7 +56,7 @@ export const renderAppShell = () => {
 
         ${heroSection()}
         ${toolSection()}
-        ${calculationFlowSection()}
+        <!-- Cipher Trace section hidden for now. Add ${"${calculationFlowSection()}"} back here when needed. -->
         ${activitySection()}
       </section>
     </main>
@@ -459,6 +459,8 @@ const renderTransformPreview = ({ input = "", key = "", result = "", pairs = [] 
 };
 
 export const renderCalculationFlow = (els, { algorithm, mode = "standby", steps = [], binarySeed = "", preview = {} }) => {
+  if (!els.flowTitle || !els.flowSteps) return;
+
   els.flowTitle.textContent = `${algorithm.label} Calculation Flow`;
   els.flowSubtitle.textContent = algorithm.description;
   els.flowMode.textContent = mode;
