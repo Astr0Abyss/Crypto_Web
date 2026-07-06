@@ -20,7 +20,9 @@ const shiftCharacter = (char, shift) => {
 
 const transformShift = (text, key, direction) => {
   const shift = parseShiftKey(key) * direction;
-  return [...text].map((char) => shiftCharacter(char, shift)).join("");
+  return [...text.toUpperCase().replace(/[^A-Z]/g, "")]
+    .map((char) => shiftCharacter(char, shift))
+    .join("");
 };
 
 export const shiftCipher = {

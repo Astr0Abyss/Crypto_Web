@@ -59,6 +59,24 @@ body::before {
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
 }
 
+.mode-toggle {
+  color: #64748b;
+}
+
+.mode-toggle-active {
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.22);
+}
+
+.key-status-ok {
+  color: #059669;
+}
+
+.key-status-error {
+  color: #e11d48;
+}
+
 .key-line {
   stroke-dasharray: 620;
   stroke-dashoffset: 620;

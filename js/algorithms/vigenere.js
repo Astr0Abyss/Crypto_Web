@@ -22,11 +22,10 @@ const shiftLetter = (char, keyShift, direction) => {
 
 const transformVigenere = (text, key, direction) => {
   const cleanKey = normalizeKey(key);
+  const cleanText = text.toUpperCase().replace(/[^A-Z]/g, "");
   let keyIndex = 0;
 
-  return [...text].map((char) => {
-    if (!/[a-z]/i.test(char)) return char;
-
+  return [...cleanText].map((char) => {
     const keyShift = cleanKey.charCodeAt(keyIndex % cleanKey.length) - 65;
     keyIndex += 1;
     return shiftLetter(char, keyShift, direction);

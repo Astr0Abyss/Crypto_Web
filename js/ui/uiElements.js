@@ -1,6 +1,7 @@
 export const renderAppShell = () => {
   document.querySelector("#app").innerHTML = `
-    <main class="relative mx-auto flex min-h-screen max-w-[1500px] gap-4 p-2 sm:p-4 lg:gap-5 lg:p-8">
+    ${authPageSection()}
+    <main id="dashboardView" class="relative mx-auto flex min-h-screen max-w-[1500px] gap-4 p-2 sm:p-4 lg:gap-5 lg:p-8">
       <aside class="glass sticky top-6 hidden h-[calc(100vh-3rem)] w-[84px] shrink-0 flex-col items-center justify-between rounded-3xl px-3 py-7 lg:flex">
         <div class="flex flex-col items-center gap-8">
           <div class="brand-logo grid h-14 w-14 place-items-center rounded-2xl text-white shadow-glow">
@@ -39,11 +40,21 @@ export const renderAppShell = () => {
             </span>
             <h1 class="text-lg font-bold tracking-tight sm:text-xl">Crypto <span class="text-blue-600">Toolkit</span></h1>
           </div>
-          <nav class="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
-            <a href="#algorithms" class="transition hover:text-blue-600">Algorithms</a>
-            <a href="#tool" class="transition hover:text-blue-600">Toolkit</a>
-            <a href="#activity" class="transition hover:text-blue-600">History</a>
-          </nav>
+          <div class="flex items-center gap-3">
+            <div id="guestBadge" class="hidden items-center gap-2 rounded-2xl border border-blue-100 bg-white/70 px-3 py-2 text-xs font-bold text-blue-700 sm:inline-flex">
+              <i data-lucide="user-round-check" class="h-4 w-4"></i>
+              <span>Guest</span>
+            </div>
+            <a id="accountLink" href="#signin" class="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-3 py-2 text-xs font-bold text-cyan-100 transition hover:-translate-y-0.5 hover:bg-blue-700">
+              <i data-lucide="user-round" class="h-4 w-4"></i>
+              <span>Sign In</span>
+            </a>
+            <nav class="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
+              <a href="#algorithms" class="transition hover:text-blue-600">Algorithms</a>
+              <a href="#tool" class="transition hover:text-blue-600">Toolkit</a>
+              <a href="#activity" class="transition hover:text-blue-600">History</a>
+            </nav>
+          </div>
         </header>
 
         <nav class="glass-soft mb-5 grid grid-cols-5 gap-2 rounded-2xl p-2 text-slate-500 lg:hidden">
@@ -56,12 +67,55 @@ export const renderAppShell = () => {
 
         ${heroSection()}
         ${toolSection()}
-        <!-- Cipher Trace section hidden for now. Add ${"${calculationFlowSection()}"} back here when needed. -->
+        ${calculationFlowSection()}
         ${activitySection()}
       </section>
     </main>
   `;
 };
+
+const authPageSection = () => `
+  <section id="authPage" class="hidden min-h-screen p-4 sm:p-6 lg:p-10">
+    <div class="mx-auto flex min-h-[calc(100vh-2rem)] max-w-[560px] items-center justify-center sm:min-h-[calc(100vh-3rem)]">
+      <div class="glass w-full rounded-3xl p-5 shadow-glass sm:p-8">
+        <a href="#dashboard" class="mb-6 inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-white/70 px-3 py-2 text-xs font-bold text-blue-700 transition hover:text-blue-900">
+          <i data-lucide="arrow-left" class="h-4 w-4"></i>
+          Dashboard
+        </a>
+        <div class="mb-6">
+          <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50/80 px-3 py-1 text-xs font-bold text-blue-700">
+            <i data-lucide="shield-check" class="h-3.5 w-3.5"></i>
+            Crypto Toolkit
+          </div>
+          <h2 id="accountTitle" class="text-2xl font-extrabold tracking-tight text-slate-950">Sign in</h2>
+          <p id="accountStatus" class="mt-2 text-sm leading-6 text-slate-500">Save generations to your account, or continue from the dashboard as a guest.</p>
+        </div>
+        <form id="loginForm" class="grid gap-3">
+          <input id="loginEmail" class="field h-12 px-4 text-sm" autocomplete="email" placeholder="Email" type="email" />
+          <input id="loginPassword" class="field h-12 px-4 text-sm" autocomplete="current-password" placeholder="Password" type="password" />
+          <button id="loginBtn" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-3 text-sm font-bold text-white shadow-glow transition hover:-translate-y-0.5">
+            <i data-lucide="log-in" class="h-4 w-4"></i> Login
+          </button>
+        </form>
+        <form id="signupForm" class="hidden grid gap-3">
+          <input id="signupName" class="field h-12 px-4 text-sm" autocomplete="name" placeholder="Name" />
+          <input id="signupEmail" class="field h-12 px-4 text-sm" autocomplete="email" placeholder="Email" type="email" />
+          <input id="signupPassword" class="field h-12 px-4 text-sm" autocomplete="new-password" placeholder="Password" type="password" />
+          <button id="signupBtn" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-3 text-sm font-bold text-white shadow-glow transition hover:-translate-y-0.5">
+            <i data-lucide="user-plus" class="h-4 w-4"></i> Create Account
+          </button>
+        </form>
+        <div class="mt-5 flex flex-col items-center gap-3 text-sm text-slate-500">
+          <button id="showSignupBtn" class="font-bold text-blue-700 transition hover:text-blue-900">Don't have an account? Sign up</button>
+          <button id="showLoginBtn" class="hidden font-bold text-blue-700 transition hover:text-blue-900">Already have an account? Login</button>
+          <button id="logoutBtn" class="hidden rounded-2xl border border-white/70 bg-white/70 px-4 py-2 text-xs font-bold text-slate-600 transition hover:text-blue-600">
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+`;
 
 const heroSection = () => `
   <section class="relative overflow-hidden rounded-3xl p-5 sm:p-8 lg:rounded-[2rem] lg:p-10">
@@ -177,13 +231,31 @@ const toolSection = () => `
           <div>
             <label id="keyLabel" class="text-sm font-bold text-slate-700" for="keyInput">Key / Shift</label>
             <input id="keyInput" class="field mt-2 h-12 px-4 text-sm" />
+            <p id="keyStatus" class="mt-2 min-h-5 text-xs font-bold text-slate-500">Key ready</p>
           </div>
         </div>
         ${rsaKeyPanel()}
         ${hillFilePanel()}
-        <div class="mt-5 flex flex-col gap-3 sm:flex-row">
-          <button id="encryptBtn" class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-3 text-sm font-bold text-white shadow-glow transition hover:-translate-y-0.5">
-            <i data-lucide="lock-keyhole" class="h-4 w-4"></i> Encrypt
+        <div class="mt-5 grid gap-3 lg:grid-cols-[1fr_auto_auto]">
+          <div class="glass-soft grid grid-cols-2 rounded-2xl p-1">
+            <button id="encryptModeBtn" class="mode-toggle mode-toggle-active rounded-xl px-4 py-3 text-sm font-bold transition" type="button">
+              <i data-lucide="lock-keyhole" class="mr-1 inline h-4 w-4"></i> Encrypt
+            </button>
+            <button id="decryptModeBtn" class="mode-toggle rounded-xl px-4 py-3 text-sm font-bold transition" type="button">
+              <i data-lucide="unlock-keyhole" class="mr-1 inline h-4 w-4"></i> Decrypt
+            </button>
+          </div>
+          <label id="autoDetectWrap" class="hidden items-center justify-center gap-2 rounded-2xl border border-cyan-200 bg-cyan-50/90 px-4 py-3 text-xs font-bold text-cyan-800 shadow-sm" title="For RSA, switch to decrypt when the input looks like spaced numbers.">
+            <input id="autoDetectToggle" type="checkbox" class="h-4 w-4 accent-blue-600" checked />
+            Auto RSA
+          </label>
+          <button id="runBtn" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-3 text-sm font-bold text-white shadow-glow transition hover:-translate-y-0.5">
+            <i id="runIcon" data-lucide="play" class="h-4 w-4"></i> <span id="runLabel">Run</span>
+          </button>
+        </div>
+        <div class="mt-3 flex flex-col gap-3 sm:flex-row">
+          <button id="swapBtn" class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-white/80 px-5 py-3 text-sm font-bold text-blue-700 transition hover:-translate-y-0.5 hover:bg-blue-50">
+            <i data-lucide="refresh-cw" class="h-4 w-4"></i> Swap To Decrypt
           </button>
           <button id="clearBtn" class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/70 bg-white/70 px-5 py-3 text-sm font-bold text-slate-700 transition hover:-translate-y-0.5 hover:text-blue-600">
             <i data-lucide="eraser" class="h-4 w-4"></i> Clear
@@ -206,12 +278,18 @@ const toolSection = () => `
         </div>
         <p id="errorMessage" class="mt-3 min-h-5 text-sm font-semibold text-rose-600"></p>
         <p id="successMessage" class="min-h-5 text-sm font-semibold text-emerald-600"></p>
-        <div class="mt-3 flex flex-col gap-3 sm:flex-row">
-          <button id="decryptBtn" class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-white/80 px-5 py-3 text-sm font-bold text-blue-700 transition hover:-translate-y-0.5 hover:bg-blue-50">
-            <i data-lucide="repeat-2" class="h-4 w-4"></i> Decrypt
-          </button>
-          <button id="copyBtn" class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/70 bg-white/70 px-5 py-3 text-sm font-bold text-slate-700 transition hover:-translate-y-0.5 hover:text-blue-600">
+        <div class="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <button id="copyBtn" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-blue-50/90 px-4 py-3 text-sm font-bold text-blue-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-100">
             <i data-lucide="copy" class="h-4 w-4"></i> Copy
+          </button>
+          <button id="downloadTextBtn" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-blue-50/90 px-4 py-3 text-sm font-bold text-blue-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-100">
+            <i data-lucide="download" class="h-4 w-4"></i> Download
+          </button>
+          <button id="saveOutputBtn" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-blue-50/90 px-4 py-3 text-sm font-bold text-blue-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-100">
+            <i data-lucide="bookmark-plus" class="h-4 w-4"></i> Save
+          </button>
+          <button id="clearOutputBtn" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-100 bg-white/90 px-4 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-rose-50 hover:text-rose-600">
+            <i data-lucide="x" class="h-4 w-4"></i> Clear
           </button>
         </div>
       </article>
@@ -221,6 +299,15 @@ const toolSection = () => `
 
 const hillFilePanel = () => `
   <div id="hillFilePanel" class="mt-4 hidden rounded-2xl border border-blue-100 bg-blue-50/70 p-4 text-xs leading-6 text-slate-600">
+    <div class="mb-4">
+      <p class="font-bold text-blue-700">Hill matrix</p>
+      <p>Enter 2x2 or 3x3 values. Examples: <code>2,3,3,6</code> or <code>17,17,5,21,18,21,2,2,19</code>.</p>
+      <div id="hillMatrixGrid" class="mt-3 grid max-w-xl grid-cols-3 gap-2"></div>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <button id="hill2Btn" class="rounded-xl bg-white/80 px-3 py-2 font-bold text-blue-700 transition hover:bg-blue-50">2x2</button>
+        <button id="hill3Btn" class="rounded-xl bg-white/80 px-3 py-2 font-bold text-blue-700 transition hover:bg-blue-50">3x3</button>
+      </div>
+    </div>
     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
       <div>
         <p class="font-bold text-blue-700">Hill file mode</p>
@@ -265,7 +352,14 @@ const rsaKeyPanel = () => `
         <input id="rsaPrivateKey" class="field h-12 px-3 font-mono text-sm" placeholder="Example: 1147,463" />
       </div>
     </div>
-    <p class="mt-3">Alphabet mapping: A=1, B=2, ... Z=26. Spaces map to 0. Use demo primes above 26 so every alphabet value decrypts correctly.</p>
+    <div class="mt-4 grid gap-3 sm:grid-cols-5">
+      <input id="rsaPInput" class="field h-11 px-3 font-mono text-sm" placeholder="p" value="5" />
+      <input id="rsaQInput" class="field h-11 px-3 font-mono text-sm" placeholder="q" value="17" />
+      <input id="rsaEInput" class="field h-11 px-3 font-mono text-sm" placeholder="e" value="13" />
+      <input id="rsaDInput" class="field h-11 px-3 font-mono text-sm" placeholder="d" value="5" />
+      <button id="applyRsaParamsBtn" class="rounded-xl bg-white/80 px-3 py-2 font-bold text-blue-700 transition hover:bg-blue-50">Apply</button>
+    </div>
+    <p class="mt-3">Course mapping: A=0, B=1, ... Z=25. Apply p, q, e, d to load matching test-case keys.</p>
   </div>
 `;
 
@@ -287,7 +381,7 @@ const activitySection = () => `
     </article>
     <article id="algorithms" class="glass rounded-3xl p-5 sm:p-6">
       <div class="mb-5 flex items-start justify-between gap-4">
-        <div><h3 class="text-lg font-extrabold">Recent Operations</h3><p class="text-sm text-slate-500">Local UI history for this session</p></div>
+        <div><h3 class="text-lg font-extrabold">Recent Operations</h3><p id="syncStatus" class="text-sm text-slate-500">Preparing guest session</p></div>
         <button id="clearHistoryBtn" class="rounded-2xl border border-white/70 bg-white/70 px-4 py-2 text-xs font-bold text-slate-600 transition hover:text-blue-600">Clear</button>
       </div>
       <div id="historyList" class="space-y-3"></div>
@@ -296,6 +390,8 @@ const activitySection = () => `
 `;
 
 export const getElements = () => ({
+  authPage: document.querySelector("#authPage"),
+  dashboardView: document.querySelector("#dashboardView"),
   plainText: document.querySelector("#plainText"),
   outputText: document.querySelector("#outputText"),
   rsaOutputMap: document.querySelector("#rsaOutputMap"),
@@ -303,11 +399,38 @@ export const getElements = () => ({
   rsaOutputMapList: document.querySelector("#rsaOutputMapList"),
   algorithmSelect: document.querySelector("#algorithmSelect"),
   algorithmDescription: document.querySelector("#algorithmDescription"),
+  guestBadge: document.querySelector("#guestBadge"),
+  accountLink: document.querySelector("#accountLink"),
+  accountTitle: document.querySelector("#accountTitle"),
+  accountStatus: document.querySelector("#accountStatus"),
+  signupForm: document.querySelector("#signupForm"),
+  signupName: document.querySelector("#signupName"),
+  signupEmail: document.querySelector("#signupEmail"),
+  signupPassword: document.querySelector("#signupPassword"),
+  signupBtn: document.querySelector("#signupBtn"),
+  loginForm: document.querySelector("#loginForm"),
+  loginEmail: document.querySelector("#loginEmail"),
+  loginPassword: document.querySelector("#loginPassword"),
+  loginBtn: document.querySelector("#loginBtn"),
+  showSignupBtn: document.querySelector("#showSignupBtn"),
+  showLoginBtn: document.querySelector("#showLoginBtn"),
+  logoutBtn: document.querySelector("#logoutBtn"),
+  syncStatus: document.querySelector("#syncStatus"),
   keyInput: document.querySelector("#keyInput"),
+  keyStatus: document.querySelector("#keyStatus"),
   keyLabel: document.querySelector("#keyLabel"),
-  encryptBtn: document.querySelector("#encryptBtn"),
-  decryptBtn: document.querySelector("#decryptBtn"),
+  encryptModeBtn: document.querySelector("#encryptModeBtn"),
+  decryptModeBtn: document.querySelector("#decryptModeBtn"),
+  autoDetectWrap: document.querySelector("#autoDetectWrap"),
+  autoDetectToggle: document.querySelector("#autoDetectToggle"),
+  runBtn: document.querySelector("#runBtn"),
+  runIcon: document.querySelector("#runIcon"),
+  runLabel: document.querySelector("#runLabel"),
+  swapBtn: document.querySelector("#swapBtn"),
   copyBtn: document.querySelector("#copyBtn"),
+  downloadTextBtn: document.querySelector("#downloadTextBtn"),
+  saveOutputBtn: document.querySelector("#saveOutputBtn"),
+  clearOutputBtn: document.querySelector("#clearOutputBtn"),
   clearBtn: document.querySelector("#clearBtn"),
   clearHistoryBtn: document.querySelector("#clearHistoryBtn"),
   errorMessage: document.querySelector("#errorMessage"),
@@ -325,9 +448,17 @@ export const getElements = () => ({
   importRsaBtn: document.querySelector("#importRsaBtn"),
   rsaPublicKey: document.querySelector("#rsaPublicKey"),
   rsaPrivateKey: document.querySelector("#rsaPrivateKey"),
+  rsaPInput: document.querySelector("#rsaPInput"),
+  rsaQInput: document.querySelector("#rsaQInput"),
+  rsaEInput: document.querySelector("#rsaEInput"),
+  rsaDInput: document.querySelector("#rsaDInput"),
+  applyRsaParamsBtn: document.querySelector("#applyRsaParamsBtn"),
   copyPublicKeyBtn: document.querySelector("#copyPublicKeyBtn"),
   copyPrivateKeyBtn: document.querySelector("#copyPrivateKeyBtn"),
   hillFilePanel: document.querySelector("#hillFilePanel"),
+  hillMatrixGrid: document.querySelector("#hillMatrixGrid"),
+  hill2Btn: document.querySelector("#hill2Btn"),
+  hill3Btn: document.querySelector("#hill3Btn"),
   fileInput: document.querySelector("#fileInput"),
   fileEncryptBtn: document.querySelector("#fileEncryptBtn"),
   fileDecryptBtn: document.querySelector("#fileDecryptBtn"),
@@ -357,7 +488,7 @@ export const setMessage = (els, message = "", type = "success") => {
 };
 
 export const setBusy = (els, busy) => {
-  [els.encryptBtn, els.decryptBtn, els.generateRsaBtn, els.importRsaBtn, els.fileEncryptBtn, els.fileDecryptBtn].forEach((button) => {
+  [els.runBtn, els.swapBtn, els.generateRsaBtn, els.importRsaBtn, els.fileEncryptBtn, els.fileDecryptBtn, els.signupBtn, els.loginBtn, els.logoutBtn, els.downloadTextBtn, els.saveOutputBtn, els.applyRsaParamsBtn].forEach((button) => {
     if (!button) return;
     button.disabled = busy;
     button.classList.toggle("opacity-60", busy);

@@ -22,7 +22,9 @@ const rotateLetter = (char, shift) => {
 
 const transformCaesar = (text, key, direction) => {
   const shift = parseCaesarShift(key || DEFAULT_CAESAR_SHIFT);
-  return [...text].map((char) => rotateLetter(char, shift * direction)).join("");
+  return [...text.toUpperCase().replace(/[^A-Z]/g, "")]
+    .map((char) => rotateLetter(char, shift * direction))
+    .join("");
 };
 
 export const caesarCipher = {
