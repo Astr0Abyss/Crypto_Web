@@ -1,4 +1,4 @@
-﻿const DEFAULT_PUBLIC_KEY = "85,13";
+const DEFAULT_PUBLIC_KEY = "85,13";
 const DEFAULT_PRIVATE_KEY = "85,5";
 
 const alphabetToNumber = (char) => {
